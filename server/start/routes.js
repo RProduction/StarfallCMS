@@ -1,5 +1,4 @@
 'use strict'
-const Helpers = use('Helpers');
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +15,6 @@ const Helpers = use('Helpers');
 
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route');
+
+/** @type {import('@adonisjs/ignitor/src/Helpers')} */
+const Helpers = use('Helpers');
