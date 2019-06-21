@@ -20,8 +20,7 @@ const Route = use('Route');
 const Helpers = use('Helpers');
 
 // routes for User Authentication
-const UserController = use('App/Controllers/Http/UserController');
-Route.post('api/user/add', UserController.add);
-Route.post('api/user/delete', UserController.delete);
-Route.post('api/user/login', UserController.login);
-Route.post('api/user/logout', UserController.logout);
+Route.post('api/user/add', 'UserController.add');
+Route.post('api/user/delete', 'UserController.delete');
+Route.post('api/user/login', 'UserController.login');
+Route.post('api/user/logout', 'UserController.logout');
