@@ -8,7 +8,7 @@ class EntitySchema extends Schema {
     this.create('entities', (table) => {
       table.increments()
       table.string('entity_name', 60).notNullable().unique()
-      table.string('project_ref', 60).notNullable().references('project_name').inTable('projects')
+      table.integer('project_ref').unsigned().notNullable().references('id').inTable('projects')
       table.timestamps()
     })
   }
