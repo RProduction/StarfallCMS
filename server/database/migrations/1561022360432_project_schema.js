@@ -8,6 +8,7 @@ class ProjectSchema extends Schema {
     this.create('projects', (table) => {
       table.increments()
       table.string('project_name', 60).notNullable().unique()
+      table.string('public_key', 30).notNullable().unique()
       table.timestamps()
     })
   }
