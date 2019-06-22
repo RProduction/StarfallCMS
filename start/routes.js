@@ -24,3 +24,9 @@ Route.post('api/user/add', 'UserController.add');
 Route.post('api/user/delete', 'UserController.delete');
 Route.post('api/user/login', 'UserController.login');
 Route.post('api/user/logout', 'UserController.logout');
+
+// routes for Projects
+Route.get('api/project', 'ProjectController.index');
+Route.post('api/project/add', 'ProjectController.add');
+Route.post('api/project/delete', 'ProjectController.delete');
+Route.post('api/project/rename', 'ProjectController.rename');
