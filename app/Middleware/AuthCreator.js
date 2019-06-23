@@ -17,14 +17,16 @@ class AuthCreator {
 		try{
 			const user = await auth.getUser();
 			Logger.info(user.authority);
-			if(user === undefined || user === null || user.authority !== 'Creator') throw('');
-			await next();
+			if(user.authority !== 'Creator') throw('');
 		}
 		catch(error){
 			Logger.warning('Need creator authorization to proceed');
+			Logger.warning(error);
 			response.unauthorized('Need creator authorization to proceed');
 			return;
 		}
+
+		await next();
   	}
 }
 

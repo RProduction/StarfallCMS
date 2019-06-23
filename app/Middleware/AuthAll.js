@@ -16,13 +16,14 @@ class AuthAll {
   	async handle ({ auth, response }, next) {
 		try{
 			await auth.check();
-			await next();
 		}
 		catch(error){
 			Logger.info('Need to be authorized to proceed');
 			response.unauthorized('Need to be authorized to proceed');
 			return;
 		}
+
+		await next();
   	}
 }
 
