@@ -5,9 +5,6 @@ const Entity = use('App/Models/Entity');
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
 
-/** @type {import('@adonisjs/lucid/src/Database')} */
-const Database = use('Database');
-
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
@@ -37,19 +34,14 @@ class EntityController {
 
             // check existing entity inside project
             const project = await Project.findByOrFail('project_name', project_name);
-            const existing = await Database.table('entities').where({
-                project_id: project.id,
-                entity_name: entity_name
-            });
+            let existing = await project.entities().where('entity_name', entity_name).fetch();
+            existing = existing.toJSON();
             if(existing.length > 0) throw('Entity already exist inside project');
-
+            
             // insert
             const entity = new Entity();
             entity.entity_name = entity_name;
-            entity.project_id = project.id;
-            const trx = await Database.beginTransaction();
-            await entity.save(trx);
-            await trx.commit();
+            await project.entities().save(entity);
 
             response.ok('succeed create new entity');
         }

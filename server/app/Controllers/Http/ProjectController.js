@@ -1,10 +1,9 @@
 'use strict'
 
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
+const Entity = use('App/Models/Entity');
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
-
-/** @type {import('@adonisjs/lucid/src/Database')} */
-const Database = use('Database');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
@@ -35,9 +34,7 @@ class ProjectController {
 
             const project = new Project();
             project.project_name = project_name;
-            const trx = await Database.beginTransaction();
-            await project.save(trx);
-            await trx.commit();
+            await project.save();
 
             Logger.info(`${project_name}: ${project.public_key}`);
             response.ok('succeed create new project');
@@ -89,9 +86,7 @@ class ProjectController {
             
             const project = await Project.findByOrFail('project_name', project_name);
             project.project_name = new_name;
-            const trx = await Database.beginTransaction();
-            await project.save(trx);
-            await trx.commit();
+            await project.save();
 
             response.ok('succeed rename project');
         }
