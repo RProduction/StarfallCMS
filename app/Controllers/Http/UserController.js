@@ -1,5 +1,6 @@
 'use strict'
 
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const User = use('App/Models/User');
 
 /** @type {import('@adonisjs/lucid/src/Database')} */
@@ -17,16 +18,20 @@ class UserController {
     */
     async add({request, response}){
         const {email, password, username, authority} = request.post();
-        const user = new User();
-        user.username = username;
-        user.email = email;
-        user.password = password;
-        user.authority = authority;
-
+        
         try{
             Logger.info(`email: ${email}, password: ${password}, username: ${username}, authority: ${authority}`);
             Logger.info('create new user');
-            await user.save();
+
+            const user = new User();
+            user.username = username;
+            user.email = email;
+            user.password = password;
+            user.authority = authority;
+            const trx = await Database.beginTransaction();
+            await user.save(trx);
+            await trx.commit();
+
             response.ok('succeed create new user');
         }
         catch(error){
@@ -44,9 +49,10 @@ class UserController {
     */
     async delete({request, response}){
         const {email} = request.post();
+        
         try{
             Logger.info(`delete user ${email}`);
-            await Database.table('users').where('email', email).delete();
+            await User.findByOrFail('email', email).delete();
             response.ok('delete user');
         }
         catch(error){

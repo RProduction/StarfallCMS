@@ -1,5 +1,6 @@
 'use strict'
 
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/lucid/src/Database')} */
@@ -50,12 +51,16 @@ class ProjectController {
         }
 
         const {project_name} = request.post();
-        const project = new Project();
-        project.project_name = project_name;
 
         try{
             Logger.info(`create new project ${project_name}`);
-            await project.save();
+
+            const project = new Project();
+            project.project_name = project_name;
+            const trx = await Database.beginTransaction();
+            await project.save(trx);
+            await trx.commit();
+
             Logger.info(`${project_name}: ${project.public_key}`);
             response.ok('succeed create new project');
         }
@@ -90,7 +95,7 @@ class ProjectController {
 
         try{
             Logger.info(`delete project ${project_name}`);
-            await Database.table('projects').where('project_name', project_name).delete();
+            await Project.findByOrFail('project_name', project_name).delete();
             response.ok('succeed delete');
         }
         catch(error){
@@ -124,8 +129,13 @@ class ProjectController {
 
         try{
             Logger.info(`rename project ${project_name} into ${new_name}`);
-            const res = await Database.table('projects').where('project_name', project_name).update('project_name', new_name);
-            if(res === 0) throw('Fail to rename');
+            
+            const project = await Project.findByOrFail('project_name', project_name);
+            project.project_name = new_name;
+            const trx = await Database.beginTransaction();
+            await project.save(trx);
+            await trx.commit();
+
             response.ok('succeed rename project');
         }
         catch(error){
