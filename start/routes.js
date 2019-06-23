@@ -26,18 +26,34 @@ Route.group(function(){
     Route.post('user/delete', 'UserController.delete');
     Route.post('user/login', 'UserController.login');
     Route.post('user/logout', 'UserController.logout');
-    
-    // routes for Projects
-    Route.get('project', 'ProjectController.index');
-    Route.post('project/add', 'ProjectController.add');
-    Route.post('project/delete', 'ProjectController.delete');
-    Route.post('project/rename', 'ProjectController.rename');
-
-    // routes for Entity
-    Route.get('entity', 'EntityController.index');
-    Route.post('entity/add', 'EntityController.add');
-    Route.post('entity/delete', 'EntityController.delete');
-    Route.post('entity/rename', 'EntityController.rename');
 
     // routes for get entity data
 }).prefix('api');
+
+// routes group with creator only auth
+// routes for Projects
+Route.group(function(){
+    Route.post('add', 'ProjectController.add');
+    Route.post('delete', 'ProjectController.delete');
+    Route.post('rename', 'ProjectController.rename');
+
+}).prefix('api/project').middleware('authCreator');
+
+// routes group with creator and manager only auth
+// routes for Entity
+Route.group(function(){
+    Route.post('add', 'EntityController.add');
+    Route.post('delete', 'EntityController.delete');
+    Route.post('rename', 'EntityController.rename');
+
+}).prefix('api/entity').middleware('authNonUser');
+
+// routes group with all auth
+Route.group(function(){
+    // routes for Projects
+    Route.get('project', 'ProjectController.index');
+
+    // routes for Entity
+    Route.get('entity', 'EntityController.index');
+
+}).prefix('api').middleware('authAll');
