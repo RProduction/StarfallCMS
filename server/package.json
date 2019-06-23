@@ -5,7 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "adonis serve",
+    "start_dev": "adonis serve --dev",
     "test": "node ace test"
   },
   "keywords": [
