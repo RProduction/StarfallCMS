@@ -59,8 +59,19 @@ class ProjectController {
 
         try{
             Logger.info(`delete project ${project_name}`);
+            // find project and all related entities
             const project = await Project.findByOrFail('project_name', project_name);
-            project.delete();
+            let target = await project.entities().where('project_id', project.id).fetch();
+            target = target.toJSON();
+            
+            // delete entities related to project
+            for(let i=0; i<target.length; i++){
+                const entity = await Entity.findOrFail(target[0].id);
+                await entity.delete();
+            }
+
+            // delete project
+            await project.delete();
             response.ok('succeed delete');
         }
         catch(error){
