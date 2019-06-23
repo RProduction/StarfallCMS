@@ -7,6 +7,7 @@ class Project extends Model {
     static boot(){
         super.boot();
         this.addHook('beforeCreate', 'ProjectHook.beforeCreate');
+        this.addHook('afterUpdate', 'ProjectHook.afterUpdate');
     }
 
     entities(){

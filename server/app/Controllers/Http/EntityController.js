@@ -65,11 +65,14 @@ class EntityController {
 
         try{
             Logger.info(`delete entity ${entity_name} in ${project_name}`);
+            // find project and entity
             const project = await Project.findByOrFail('project_name', project_name);
-            await Entity.query().where({
-                project_id: project.id,
-                entity_name: entity_name
-            }).delete();
+            let target = await project.entities().where('entity_name', entity_name).fetch();
+            target = target.toJSON();
+
+            // find and delete entity model
+            const entity = await Entity.findOrFail(target[0].id);
+            entity.delete();
             response.ok('succeed delete');
         }
         catch(error){
@@ -95,19 +98,12 @@ class EntityController {
             
             // check existing entity inside project
             const project = await Project.findByOrFail('project_name', project_name);
-            const existing = await Database.table('entities').where({
-                project_id: project.id,
-                entity_name: new_name
-            });
+            let existing = await project.entities().where('entity_name', new_name).fetch();
+            existing = existing.toJSON();
             if(existing.length > 0) throw('Entity already exist with new name');
 
             // rename
-            const trx = await Database.beginTransaction();
-            await trx.table('entities').where({
-                project_id: project.id,
-                entity_name: entity_name
-            }).update('entity_name', new_name);
-            await trx.commit();
+            await project.entities().where('entity_name', entity_name).update('entity_name', new_name);
 
             response.ok('succeed rename entity');
         }
