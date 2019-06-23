@@ -19,14 +19,25 @@ const Route = use('Route');
 /** @type {import('@adonisjs/ignitor/src/Helpers')} */
 const Helpers = use('Helpers');
 
-// routes for User Authentication
-Route.post('api/user/add', 'UserController.add');
-Route.post('api/user/delete', 'UserController.delete');
-Route.post('api/user/login', 'UserController.login');
-Route.post('api/user/logout', 'UserController.logout');
 
-// routes for Projects
-Route.get('api/project', 'ProjectController.index');
-Route.post('api/project/add', 'ProjectController.add');
-Route.post('api/project/delete', 'ProjectController.delete');
-Route.post('api/project/rename', 'ProjectController.rename');
+Route.group(function(){
+    // routes for User Authentication
+    Route.post('user/add', 'UserController.add');
+    Route.post('user/delete', 'UserController.delete');
+    Route.post('user/login', 'UserController.login');
+    Route.post('user/logout', 'UserController.logout');
+    
+    // routes for Projects
+    Route.get('project', 'ProjectController.index');
+    Route.post('project/add', 'ProjectController.add');
+    Route.post('project/delete', 'ProjectController.delete');
+    Route.post('project/rename', 'ProjectController.rename');
+
+    // routes for Entity
+    Route.get('entity', 'EntityController.index');
+    Route.post('entity/add', 'EntityController.add');
+    Route.post('entity/delete', 'EntityController.delete');
+    Route.post('entity/rename', 'EntityController.rename');
+
+    // routes for get entity data
+}).prefix('api');
