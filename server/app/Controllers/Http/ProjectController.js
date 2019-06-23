@@ -13,43 +13,21 @@ class ProjectController {
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // get all projects data including name and public_key
     // can only be called from StarfallCMS only(must be login)
-    async index({response, auth}){
-        try{
-            await auth.check();
-        }
-        catch(error){
-            Logger.info(`Need to be authorized to get projects`);
-            response.unauthorized('Need to be authorized to get projects');
-            return;
-        }
-
+    async index({response}){
         response.json(await Project.all());
     }
 
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // add new project
     // only creator can add new project
-    async add({request, auth, response}){
-        try{
-            const user = await auth.getUser();
-            Logger.info(user.authority);
-            if(user === undefined || user === null || user.authority !== 'Creator') throw('');
-        }
-        catch(error){
-            Logger.warning(`Need right authorization to add new project`);
-            response.unauthorized('Need right authorization to add new project');
-            return;
-        }
-
+    async add({request, response}){
         const {project_name} = request.post();
 
         try{
@@ -75,27 +53,17 @@ class ProjectController {
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // delete existing project
     // only creator can delete existing project
-    async delete({request, auth, response}){
-        try{
-            const user = await auth.getUser();
-            if(user === undefined || user === null || user.authority !== 'Creator') throw('');
-        }
-        catch(error){
-            Logger.warning(`Need right authorization to delete existing project`);
-            response.unauthorized('Need right authorization to delete existing project');
-            return;
-        }
-
+    async delete({request, response}){
         const {project_name} = request.post();
 
         try{
             Logger.info(`delete project ${project_name}`);
-            await Project.findByOrFail('project_name', project_name).delete();
+            const project = await Project.findByOrFail('project_name', project_name);
+            project.delete();
             response.ok('succeed delete');
         }
         catch(error){
@@ -110,21 +78,10 @@ class ProjectController {
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // rename existing project
     // only creator can rename existing project
-    async rename({request, auth, response}){
-        try{
-            const user = await auth.getUser();
-            if(user === undefined || user === null || user.authority !== 'Creator') throw('');
-        }
-        catch(error){
-            Logger.warning(`Need right authorization to rename existing project`);
-            response.unauthorized('Need right authorization to rename existing project');
-            return;
-        }
-
+    async rename({request, response}){
         const {project_name, new_name} = request.post();
 
         try{

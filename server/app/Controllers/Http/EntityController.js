@@ -15,42 +15,21 @@ class EntityController {
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // get all available entities
-    async index({response, auth}){
-        try{
-            await auth.check();
-        }
-        catch(error){
-            Logger.info(`Need to be authorized to get entities`);
-            response.unauthorized('Need to be authorized to get entities');
-            return;
-        }
-
+    // can only be called from StarfallCMS only(must be login)
+    async index({response}){
         response.json(await Entity.all());
     }
     
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // add new entity
     // only creator and manager can add new entity
-    async add({request, auth, response}){
-        try{
-            const user = await auth.getUser();
-            Logger.info(user.authority);
-            if(user === undefined || user === null || user.authority === 'User') throw('');
-        }
-        catch(error){
-            Logger.warning(`Need right authorization to add new entity`);
-            response.unauthorized('Need right authorization to add new entity');
-            return;
-        }
-
+    async add({request, response}){
         const {entity_name, project_name} = request.post();
 
         try{
@@ -60,7 +39,7 @@ class EntityController {
             const project = await Project.findByOrFail('project_name', project_name);
             const existing = await Database.table('entities').where({
                 project_id: project.id,
-                entity_name: new_name
+                entity_name: entity_name
             });
             if(existing.length > 0) throw('Entity already exist inside project');
 
@@ -85,23 +64,11 @@ class EntityController {
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // delete existing project
     // only creator can delete existing project
-    async delete({request, auth, response}){
-        try{
-            const user = await auth.getUser();
-            Logger.info(user.authority);
-            if(user === undefined || user === null || user.authority === 'User') throw('');
-        }
-        catch(error){
-            Logger.warning(`Need right authorization to delete existing entity`);
-            response.unauthorized('Need right authorization to delete existing entity');
-            return;
-        }
-
+    async delete({request, response}){
         const {entity_name, project_name} = request.post();
 
         try{
@@ -125,21 +92,10 @@ class EntityController {
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // rename existing project
     // only creator can rename existing project
-    async rename({request, auth, response}){
-        try{
-            const user = await auth.getUser();
-            if(user === undefined || user === null || user.authority === 'User') throw('');
-        }
-        catch(error){
-            Logger.warning(`Need right authorization to rename existing entity`);
-            response.unauthorized('Need right authorization to rename existing entity');
-            return;
-        }
-
+    async rename({request, response}){
         const {entity_name, new_name, project_name} = request.post();
 
         try{
