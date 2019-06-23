@@ -17,14 +17,16 @@ class AuthNonUser {
 		try{
             const user = await auth.getUser();
             Logger.info(user.authority);
-			if(user === undefined || user === null || user.authority === 'User') throw('');
-			await next();
+			if(user.authority === 'User') throw('');
         }
         catch(error){
-            Logger.warning('Need creator or manager authorization to proceed');
+			Logger.warning('Need creator or manager authorization to proceed');
+			Logger.warning(error);
             response.unauthorized('Need creator or manager authorization to proceed');
             return;
-        }
+		}
+		
+		await next();
 	}
 }
 
