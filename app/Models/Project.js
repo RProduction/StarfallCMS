@@ -8,6 +8,10 @@ class Project extends Model {
         super.boot();
         this.addHook('beforeCreate', 'ProjectHook.beforeCreate');
     }
+
+    entities(){
+        return this.hasMany('App/Models/Entity');
+    }
 }
 
 module.exports = Project
