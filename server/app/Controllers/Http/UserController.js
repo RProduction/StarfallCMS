@@ -52,7 +52,8 @@ class UserController {
         
         try{
             Logger.info(`delete user ${email}`);
-            await User.findByOrFail('email', email).delete();
+            const user = await User.findByOrFail('email', email);
+            await user.delete();
             response.ok('delete user');
         }
         catch(error){
