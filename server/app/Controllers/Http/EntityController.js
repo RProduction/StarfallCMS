@@ -103,7 +103,11 @@ class EntityController {
             if(existing.length > 0) throw('Entity already exist with new name');
 
             // rename
-            await project.entities().where('entity_name', entity_name).update('entity_name', new_name);
+            let rawEntity = await project.entities().where('entity_name', entity_name).fetch();
+            rawEntity = rawEntity.toJSON();
+            const entity = await Entity.findOrFail(rawEntity[0].id);
+            entity.entity_name = new_name;
+            entity.save();
 
             response.ok('succeed rename entity');
         }

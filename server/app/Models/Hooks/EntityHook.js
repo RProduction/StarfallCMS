@@ -14,7 +14,7 @@ const EntityHook = exports = module.exports = {}
 
 /** @param {Model} modelInstance*/
 // hook for creating new table when entity is created
-EntityHook.afterCreate = async (modelInstance) => {
+EntityHook.beforeCreate = async (modelInstance) => {
     try{
         const project = await Project.findOrFail(modelInstance.project_id);
         const tablename = project.project_name + modelInstance.entity_name;
@@ -28,10 +28,10 @@ EntityHook.afterCreate = async (modelInstance) => {
 
 /** @param {Model} modelInstance*/
 // hook for rename table when entity is rename
-EntityHook.afterUpdate = async (modelInstance) => {
-    if(modelInstance.entity_name.isDirty){
+EntityHook.beforeUpdate = async (modelInstance) => {
+    if(modelInstance.dirty.entity_name){
         const project = await Project.findOrFail(modelInstance.project_id);
-        const name = project.project_name + modelInstance.dirty.entity_name;
+        const name = project.project_name + modelInstance.$originalAttributes.entity_name;
         const newname = project.project_name + modelInstance.entity_name;
         Logger.info(`rename table ${name} into ${newname}`);
         await Database.raw(`ALTER TABLE ${name} RENAME TO ${newname}`);
@@ -40,7 +40,7 @@ EntityHook.afterUpdate = async (modelInstance) => {
 
 /** @param {Model} modelInstance*/
 // hook for delete table when entity is deleted
-EntityHook.afterDelete = async (modelInstance) => {
+EntityHook.beforeDelete = async (modelInstance) => {
     const project = await Project.findOrFail(modelInstance.project_id);
     const tablename = project.project_name + modelInstance.entity_name;
     Logger.info(`delete table ${tablename}`);
