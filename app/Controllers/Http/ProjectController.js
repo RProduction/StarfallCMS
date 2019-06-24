@@ -66,7 +66,7 @@ class ProjectController {
             
             // delete entities related to project
             for(let i=0; i<target.length; i++){
-                const entity = await Entity.findOrFail(target[0].id);
+                const entity = await Entity.findOrFail(target[i].id);
                 await entity.delete();
             }
 
