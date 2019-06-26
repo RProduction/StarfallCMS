@@ -22,13 +22,13 @@ const Helpers = use('Helpers');
 
 Route.group(function(){
     // routes for User Authentication
-    Route.post('user/add', 'UserController.add');
-    Route.post('user/delete', 'UserController.delete');
-    Route.post('user/login', 'UserController.login');
-    Route.post('user/logout', 'UserController.logout');
+    Route.post('add', 'UserController.add');
+    Route.delete(':id', 'UserController.delete');
+    Route.post('login', 'UserController.login');
+    Route.post('logout', 'UserController.logout');
 
     // routes for get entity data
-}).prefix('api');
+}).prefix('api/user');
 
 // routes group with creator only auth
 // routes for Projects
