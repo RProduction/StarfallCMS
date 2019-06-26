@@ -4,9 +4,6 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
 
-/** @type {import('@adonisjs/lucid/src/Database')} */
-const Database = use('Database');
-
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
@@ -17,9 +14,9 @@ const EntityHook = exports = module.exports = {}
 EntityHook.beforeCreate = async (modelInstance) => {
     try{
         const project = await Project.findOrFail(modelInstance.project_id);
-        const tablename = project.project_name + modelInstance.entity_name;
-        Logger.info(`create new table ${tablename}`);
-        await Database.raw(`CREATE TABLE ${tablename} (id int)`);
+        const projectname = project.project_name;
+        const tablename = modelInstance.entity_name;
+        Logger.info(`create new table ${tablename} in database ${projectname}`);
     }
     catch(error){
         Logger.warning(error);
@@ -31,10 +28,10 @@ EntityHook.beforeCreate = async (modelInstance) => {
 EntityHook.beforeUpdate = async (modelInstance) => {
     if(modelInstance.dirty.entity_name){
         const project = await Project.findOrFail(modelInstance.project_id);
-        const name = project.project_name + modelInstance.$originalAttributes.entity_name;
-        const newname = project.project_name + modelInstance.entity_name;
-        Logger.info(`rename table ${name} into ${newname}`);
-        await Database.raw(`ALTER TABLE ${name} RENAME TO ${newname}`);
+        const projectname = project.project_name;
+        const name = modelInstance.$originalAttributes.entity_name;
+        const newname = modelInstance.entity_name;
+        Logger.info(`rename table ${name} into ${newname} in database ${projectname}`);
     }
 }
 
@@ -42,7 +39,7 @@ EntityHook.beforeUpdate = async (modelInstance) => {
 // hook for delete table when entity is deleted
 EntityHook.beforeDelete = async (modelInstance) => {
     const project = await Project.findOrFail(modelInstance.project_id);
-    const tablename = project.project_name + modelInstance.entity_name;
-    Logger.info(`delete table ${tablename}`);
-    await Database.raw(`DROP TABLE ${tablename}`);
+    const projectname = project.project_name;
+    const tablename = modelInstance.entity_name;
+    Logger.info(`delete table ${tablename} in database ${projectname}`);
 }

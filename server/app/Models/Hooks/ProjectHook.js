@@ -23,10 +23,8 @@ ProjectHook.beforeCreate = async (modelInstance) => {
 // hook for rename table when project is rename
 ProjectHook.beforeUpdate = async (modelInstance) => {
     if(modelInstance.dirty.project_name){
-        const entity = await Entity.findByOrFail('project_id',modelInstance.id);
-        const name = modelInstance.$originalAttributes.project_name + entity.entity_name;
-        const newname = modelInstance.project_name + entity.entity_name;
-        Logger.info(`rename table ${name} into ${newname}`);
-        await Database.raw(`ALTER TABLE ${name} RENAME TO ${newname}`);
+        const name = modelInstance.$originalAttributes.project_name;
+        const newname = modelInstance.project_name;
+        Logger.info(`rename database ${name} into ${newname}`);
     }
 }
