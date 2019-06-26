@@ -23,10 +23,57 @@ class UserController {
 
     /**
     * @param {object} ctx
+    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
+    */
+    // get status of authentication
+    // will return message informing status
+    // if first boot(no user yet) then 0
+    // if not first boot and not login then -1
+    // if not first boot and user login then 1
+    // if not first boot and manager login then 2
+    // if not first boot and creator login then 3
+    async status({auth}){
+        try{
+            const users = User.all();
+            if(users.length == 0){
+                Logger.warning("First boot");
+                return 0;
+            }
+
+            const user = await auth.getUser();
+            switch(user.authority){
+                case 'Creator':
+                    Logger.warning("Creator Logged in");
+                return 3;
+                case 'Manager':
+                    Logger.warning("Manager Logged in");
+                return 2;
+                case 'User':
+                    Logger.warning("User Logged in");
+                return 1;
+            }
+        }
+        catch(error){
+            Logger.warning("Not logged in");
+            return -1;
+        }
+    }
+
+    /**
+    * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async add({request, response}){
+    async add({request, response, auth}){
+        // check if first boot then allow add user as creator
+        // can only add user from creator/manager/first boot
+        const status = await this.status(auth);
+        if(status === -1 || status === 1){
+            Logger.warning("Cannot add user");
+            response.internalServerError('Cannot add user');
+            return;
+        }
+
         const {password, username, authority} = request.post();
         
         try{
@@ -55,7 +102,16 @@ class UserController {
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async delete({response, params}){
+    async delete({response, params, auth}){
+        // check logged as creator or manager
+        // can only delete user from creator/manager
+        const status = await this.status(auth);
+        if(status === -1 || status === 1 || status === 0){
+            Logger.warning("Cannot delete user");
+            response.internalServerError('Cannot delete user');
+            return;
+        }
+
         const id = params.id;
         
         try{

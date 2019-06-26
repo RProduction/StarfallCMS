@@ -35,6 +35,7 @@ Route.group(function(){
 
 Route.group(function(){
     // routes for User Authentication
+    Route.get('status', 'UserController.status');
     Route.post('add', 'UserController.add');
     Route.delete(':id', 'UserController.delete');
     Route.post('login', 'UserController.login');
