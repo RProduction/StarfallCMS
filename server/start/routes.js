@@ -19,6 +19,19 @@ const Route = use('Route');
 /** @type {import('@adonisjs/ignitor/src/Helpers')} */
 const Helpers = use('Helpers');
 
+// routes group with all auth
+Route.group(function(){
+    // routes for users
+    Route.get('user', 'UserController.index');
+
+    // routes for Projects
+    Route.get('project', 'ProjectController.index');
+
+    // routes for Entity
+    Route.get('entity', 'EntityController.index');
+    Route.get('entity/:id', 'EntityController.entities');
+
+}).prefix('api').middleware('authAll');
 
 Route.group(function(){
     // routes for User Authentication
@@ -33,27 +46,23 @@ Route.group(function(){
 // routes group with creator only auth
 // routes for Projects
 Route.group(function(){
-    Route.post('add', 'ProjectController.add');
-    Route.post('delete', 'ProjectController.delete');
-    Route.post('rename', 'ProjectController.rename');
+    Route.post('', 'ProjectController.add');
+    Route.delete(':id', 'ProjectController.delete');
+    Route.post(':id/rename', 'ProjectController.rename');
 
-}).prefix('api/project').middleware('authCreator');
+}).prefix('api/project').middleware('authNonUser');
 
 // routes group with creator and manager only auth
 // routes for Entity
 Route.group(function(){
-    Route.post('add', 'EntityController.add');
-    Route.post('delete', 'EntityController.delete');
-    Route.post('rename', 'EntityController.rename');
+    Route.post(':id', 'EntityController.add');
+    Route.delete(':id', 'EntityController.delete');
+    Route.post(':id/rename', 'EntityController.rename');
 
 }).prefix('api/entity').middleware('authNonUser');
 
-// routes group with all auth
+// routes group for public access
+// need KEY API
 Route.group(function(){
-    // routes for Projects
-    Route.get('project', 'ProjectController.index');
 
-    // routes for Entity
-    Route.get('entity', 'EntityController.index');
-
-}).prefix('api').middleware('authAll');
+}).prefix('api');

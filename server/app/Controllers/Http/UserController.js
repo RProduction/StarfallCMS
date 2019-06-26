@@ -13,6 +13,16 @@ class UserController {
     
     /**
     * @param {object} ctx
+    * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    */
+    // get all available users
+    // can only be called from StarfallCMS only(must be login)
+    async index({response}){
+        response.json(await User.all());
+    }
+
+    /**
+    * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
