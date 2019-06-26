@@ -17,15 +17,14 @@ class UserController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     async add({request, response}){
-        const {email, password, username, authority} = request.post();
+        const {password, username, authority} = request.post();
         
         try{
-            Logger.info(`email: ${email}, password: ${password}, username: ${username}, authority: ${authority}`);
+            Logger.info(`username: ${username}, password: ${password}, authority: ${authority}`);
             Logger.info('create new user');
 
             const user = new User();
             user.username = username;
-            user.email = email;
             user.password = password;
             user.authority = authority;
             const trx = await Database.beginTransaction();
@@ -44,15 +43,14 @@ class UserController {
 
     /**
     * @param {object} ctx
-    * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async delete({request, response}){
-        const {email} = request.post();
+    async delete({response, params}){
+        const id = params.id;
         
         try{
-            Logger.info(`delete user ${email}`);
-            const user = await User.findByOrFail('email', email);
+            Logger.info(`delete user with id ${id}`);
+            const user = await User.findOrFail(id);
             await user.delete();
             response.ok('delete user');
         }
@@ -71,11 +69,11 @@ class UserController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     async login({request, auth, response}){
-        const {email, password} = request.post();
+        const {username, password} = request.post();
 
         try{
-            Logger.info(`login email: ${email}, password: ${password}`);
-            await auth.attempt(email, password);
+            Logger.info(`username: ${username}, password: ${password}`);
+            await auth.attempt(username, password);
             response.ok('succeed login');
         }
         catch(error){
