@@ -27,16 +27,16 @@ class ProjectController {
     // add new project
     // only creator can add new project
     async add({request, response}){
-        const {project_name} = request.post();
+        const {name} = request.post();
 
         try{
-            Logger.info(`create new project ${project_name}`);
+            Logger.info(`create new project ${name}`);
 
             const project = new Project();
-            project.project_name = project_name;
+            project.project_name = name;
             await project.save();
 
-            Logger.info(`${project_name}: ${project.public_key}`);
+            Logger.info(`${name}: ${project.public_key}`);
             response.ok('succeed create new project');
         }
         catch(error){
@@ -49,18 +49,17 @@ class ProjectController {
 
     /**
     * @param {object} ctx
-    * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // delete existing project
     // only creator can delete existing project
-    async delete({request, response}){
-        const {project_name} = request.post();
+    async delete({response, params}){
+        const id = params.id;
 
         try{
-            Logger.info(`delete project ${project_name}`);
+            Logger.info(`delete project with id ${id}`);
             // find project and all related entities
-            const project = await Project.findByOrFail('project_name', project_name);
+            const project = await Project.findOrFail(id);
             let target = await project.entities().where('project_id', project.id).fetch();
             target = target.toJSON();
             
@@ -89,14 +88,15 @@ class ProjectController {
     */
     // rename existing project
     // only creator can rename existing project
-    async rename({request, response}){
-        const {project_name, new_name} = request.post();
+    async rename({request, response, params}){
+        const id = params.id;
+        const {name} = request.post();
 
         try{
-            Logger.info(`rename project ${project_name} into ${new_name}`);
+            Logger.info(`rename project with id ${id} into ${name}`);
             
-            const project = await Project.findByOrFail('project_name', project_name);
-            project.project_name = new_name;
+            const project = await Project.findOrFail(id);
+            project.project_name = name;
             await project.save();
 
             response.ok('succeed rename project');
