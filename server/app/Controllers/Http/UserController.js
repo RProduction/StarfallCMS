@@ -34,27 +34,29 @@ class UserController {
     // if not first boot and creator login then 3
     async status({auth}){
         try{
-            const users = User.all();
-            if(users.length == 0){
-                Logger.warning("First boot");
+            const usercount = await User.getCount();
+            Logger.info(`User count ${usercount}`);
+            if(usercount === 0){
+                Logger.info("First boot");
                 return 0;
             }
 
             const user = await auth.getUser();
             switch(user.authority){
                 case 'Creator':
-                    Logger.warning("Creator Logged in");
+                    Logger.info("Creator Logged in");
                 return 3;
                 case 'Manager':
-                    Logger.warning("Manager Logged in");
+                    Logger.info("Manager Logged in");
                 return 2;
                 case 'User':
-                    Logger.warning("User Logged in");
+                    Logger.info("User Logged in");
                 return 1;
             }
         }
         catch(error){
             Logger.warning("Not logged in");
+            Logger.warning(error);
             return -1;
         }
     }
@@ -64,10 +66,11 @@ class UserController {
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async add({request, response, auth}){
+    async add(ctx){
+        const {request, response} = ctx;
         // check if first boot then allow add user as creator
         // can only add user from creator/manager/first boot
-        const status = await this.status(auth);
+        const status = await this.status(ctx);
         if(status === -1 || status === 1){
             Logger.warning("Cannot add user");
             response.internalServerError('Cannot add user');
@@ -134,7 +137,7 @@ class UserController {
     * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async login({request, auth, response}){
+    async signin({request, auth, response}){
         const {username, password} = request.post();
 
         try{
@@ -155,7 +158,7 @@ class UserController {
     * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async logout({auth, response}){
+    async signout({auth, response}){
         try{
             Logger.info(`logout`);
             await auth.logout();
