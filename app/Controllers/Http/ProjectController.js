@@ -8,6 +8,8 @@ const Project = use('App/Models/Project');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
+const Ws = use('Ws');
+
 class ProjectController {
     /**
     * @param {object} ctx
@@ -38,6 +40,11 @@ class ProjectController {
 
             Logger.info(`${name}: ${project.public_key}`);
             response.ok('succeed create new project');
+            
+            const subscription = Ws.getChannel('project').topic('project');
+            if(Boolean(subscription)){
+                subscription.broadcast('add', project);
+            }
         }
         catch(error){
             Logger.warning('Fail to create new project');
@@ -72,6 +79,14 @@ class ProjectController {
             // delete project
             await project.delete();
             response.ok('succeed delete');
+
+            const subscription = Ws.getChannel('project').topic('project');
+            if(Boolean(subscription)){
+                subscription.broadcast('delete', {
+                    id: project.id, 
+                    project_name: project.project_name
+                });
+            }
         }
         catch(error){
             Logger.warning('Fail to delete project');
@@ -96,10 +111,19 @@ class ProjectController {
             Logger.info(`rename project with id ${id} into ${name}`);
             
             const project = await Project.findOrFail(id);
+            const oldname = project.project_name;
             project.project_name = name;
             await project.save();
 
             response.ok('succeed rename project');
+
+            const subscription = Ws.getChannel('project').topic('project');
+            if(Boolean(subscription)){
+                subscription.broadcast('rename', {
+                    old_name: oldname,
+                    ...project.toJSON()
+                });
+            }
         }
         catch(error){
             Logger.warning('Fail to rename project');
