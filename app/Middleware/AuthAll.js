@@ -24,7 +24,25 @@ class AuthAll {
 		}
 
 		await next();
-  	}
+	  }
+	  
+	  /**
+	* @param {object} ctx
+	* @param {Response} ctx.response
+	* @param {Auth} ctx.auth
+	* @param {Function} next
+	*/
+	  async wsHandle({ auth}, next){
+		  try {
+			  await auth.check();
+		  }
+		  catch (error) {
+			  Logger.info('Need to be authorized to proceed');
+			  return;
+		  }
+
+		  await next();
+	  }
 }
 
 module.exports = AuthAll

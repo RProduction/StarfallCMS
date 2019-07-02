@@ -11,7 +11,7 @@ class Entity extends Model {
         this.addHook('beforeDelete', 'EntityHook.beforeDelete');
     }
 
-    projects(){
+    project(){
         return this.belongsTo('App/Models/Project');
     }
 }
