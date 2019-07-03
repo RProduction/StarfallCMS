@@ -1,15 +1,15 @@
 'use strict'
 
-/** @type {import('@adonisjs/lucid/src/Schema')} */
+/** @type {import('lucid-mongo/src/Migration')} */
 const Schema = use('Schema')
 
 class ProjectSchema extends Schema {
   up () {
-    this.create('projects', (table) => {
-      table.increments()
-      table.string('project_name', 60).notNullable().unique()
-      table.string('public_key', 30).notNullable().unique()
-      table.timestamps()
+    this.create('projects', (collection) => {
+      collection.increments();
+      collection.index('name', {name: 1}, {unique: true});
+      collection.index('public_key', {name: 1}, {unique: true});
+      collection.timestamps();
     })
   }
 
