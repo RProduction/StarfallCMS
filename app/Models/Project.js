@@ -1,17 +1,17 @@
 'use strict'
 
-/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
+/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const Model = use('Model')
 
 class Project extends Model {
     static boot(){
         super.boot();
         this.addHook('beforeCreate', 'ProjectHook.beforeCreate');
-        this.addHook('beforeUpdate', 'ProjectHook.beforeUpdate');
+        this.addHook('beforeDelete', 'ProjectHook.beforeDelete');
     }
 
     entities(){
-        return this.hasMany('App/Models/Entity');
+        return this.hasMany('App/Models/Entity', '_id', 'project_id');
     }
 }
 

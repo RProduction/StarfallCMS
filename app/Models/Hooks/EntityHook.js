@@ -14,8 +14,8 @@ const EntityHook = exports = module.exports = {}
 EntityHook.beforeCreate = async (modelInstance) => {
     try{
         const project = await Project.findOrFail(modelInstance.project_id);
-        const projectname = project.project_name;
-        const tablename = modelInstance.entity_name;
+        const projectname = project.name;
+        const tablename = modelInstance.name;
         Logger.info(`create new table ${tablename} in database ${projectname}`);
     }
     catch(error){
@@ -28,9 +28,9 @@ EntityHook.beforeCreate = async (modelInstance) => {
 EntityHook.beforeUpdate = async (modelInstance) => {
     if(modelInstance.dirty.entity_name){
         const project = await Project.findOrFail(modelInstance.project_id);
-        const projectname = project.project_name;
-        const name = modelInstance.$originalAttributes.entity_name;
-        const newname = modelInstance.entity_name;
+        const projectname = project.name;
+        const name = modelInstance.$originalAttributes.name;
+        const newname = modelInstance.name;
         Logger.info(`rename table ${name} into ${newname} in database ${projectname}`);
     }
 }
@@ -39,7 +39,7 @@ EntityHook.beforeUpdate = async (modelInstance) => {
 // hook for delete table when entity is deleted
 EntityHook.beforeDelete = async (modelInstance) => {
     const project = await Project.findOrFail(modelInstance.project_id);
-    const projectname = project.project_name;
-    const tablename = modelInstance.entity_name;
+    const projectname = project.name;
+    const tablename = modelInstance.name;
     Logger.info(`delete table ${tablename} in database ${projectname}`);
 }

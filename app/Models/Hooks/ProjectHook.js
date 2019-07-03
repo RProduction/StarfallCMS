@@ -1,13 +1,10 @@
 'use strict'
-/** @typedef {import('@adonisjs/lucid/src/Lucid/Model')} Model*/
+/** @typedef {import('lucid-mongo/src/LucidMongo/Model')} Model*/
 
 const crypto = require('crypto');
 
-/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
+/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const Entity = use('App/Models/Entity');
-
-/** @type {import('@adonisjs/lucid/src/Database')} */
-const Database = use('Database');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
@@ -20,11 +17,16 @@ ProjectHook.beforeCreate = async (modelInstance) => {
 }
 
 /** @param {Model} modelInstance*/
-// hook for rename table when project is rename
-ProjectHook.beforeUpdate = async (modelInstance) => {
-    if(modelInstance.dirty.project_name){
-        const name = modelInstance.$originalAttributes.project_name;
-        const newname = modelInstance.project_name;
-        Logger.info(`rename database ${name} into ${newname}`);
+// hook for delete all entity inside project when project is deleted
+ProjectHook.beforeDelete = async (modelInstance) => {
+    let entities = await modelInstance.entities().fetch();
+    entities = entities.toJSON();
+
+    // delete entities related to project
+    for(let entity of entities){
+        const temp = await Entity.find(entity._id);
+        if(temp) await temp.delete();
     }
+
+    Logger.info(`delete all entities(${entities.length}) in project ${modelInstance.name}`);
 }

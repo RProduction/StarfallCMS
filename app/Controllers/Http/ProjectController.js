@@ -1,8 +1,8 @@
 'use strict'
 
-/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
+/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const Entity = use('App/Models/Entity');
-/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
+/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
@@ -35,7 +35,7 @@ class ProjectController {
             Logger.info(`create new project ${name}`);
 
             const project = new Project();
-            project.project_name = name;
+            project.name = name;
             await project.save();
 
             Logger.info(`${name}: ${project.public_key}`);
@@ -65,26 +65,16 @@ class ProjectController {
 
         try{
             Logger.info(`delete project with id ${id}`);
-            // find project and all related entities
-            const project = await Project.findOrFail(id);
-            let target = await project.entities().where('project_id', project.id).fetch();
-            target = target.toJSON();
             
-            // delete entities related to project
-            for(let i=0; i<target.length; i++){
-                const entity = await Entity.findOrFail(target[i].id);
-                await entity.delete();
-            }
-
-            // delete project
+            const project = await Project.findOrFail(id);
             await project.delete();
             response.ok('succeed delete');
 
             const subscription = Ws.getChannel('project').topic('project');
             if(Boolean(subscription)){
                 subscription.broadcast('delete', {
-                    id: project.id, 
-                    project_name: project.project_name
+                    _id: project._id, 
+                    name: project.name
                 });
             }
         }
@@ -111,8 +101,8 @@ class ProjectController {
             Logger.info(`rename project with id ${id} into ${name}`);
             
             const project = await Project.findOrFail(id);
-            const oldname = project.project_name;
-            project.project_name = name;
+            const oldname = project.name;
+            project.name = name;
             await project.save();
 
             response.ok('succeed rename project');
