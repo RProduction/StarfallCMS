@@ -1,17 +1,17 @@
 'use strict'
 
-/** @type {import('@adonisjs/lucid/src/Schema')} */
+/** @type {import('lucid-mongo/src/Migration')} */
 const Schema = use('Schema')
 
 class TokensSchema extends Schema {
   up () {
-    this.create('tokens', (table) => {
-      table.increments()
-      table.integer('user_id').unsigned().references('id').inTable('users')
-      table.string('token', 255).notNullable().unique().index()
-      table.string('type', 80).notNullable()
-      table.boolean('is_revoked').defaultTo(false)
-      table.timestamps()
+    this.create('tokens', (collection) => {
+      collection.increments();
+      collection.string('user_id').references('users._id');
+      collection.index('token', {token: 1}, {unique: true});
+      collection.string('type', 80);
+      collection.boolean('is_revoked').defaultTo(false);
+      collection.timestamps();
     })
   }
 
