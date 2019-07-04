@@ -79,7 +79,6 @@ class EntityController {
             if(Boolean(subscription)){
                 subscription.broadcast('add', {
                     project_id: project.id,
-                    project_name: project.name,
                     ...entity.toJSON()
                 });
             }    
@@ -106,9 +105,6 @@ class EntityController {
             
             // find and delete entity model
             const entity = await Entity.findOrFail(id);
-            
-            // find project
-            let project = await Project.findOrFail(entity.project_id);
 
             await entity.delete();
             response.ok('succeed delete');
@@ -116,10 +112,7 @@ class EntityController {
             const subscription = Ws.getChannel('entity').topic('entity');
             if(Boolean(subscription)){
                 subscription.broadcast('delete', {
-                    project_id: project._id,
-                    project_name: project.name,
-                    _id: entity._id, 
-                    name: entity.name
+                    _id: entity._id
                 });
             }    
         }
@@ -153,7 +146,6 @@ class EntityController {
             if(count) throw('Entity already exist inside project');
 
             // rename
-            const oldname = entity.name;
             entity.name = name;
             await entity.save();
 
@@ -163,8 +155,6 @@ class EntityController {
             if(Boolean(subscription)){
                 subscription.broadcast('rename', {
                     project_id: project._id,
-                    project_name: project.name,
-                    old_name: oldname,
                     ...entity.toJSON()
                 });
             }    
