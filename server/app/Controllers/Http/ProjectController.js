@@ -16,9 +16,10 @@ class ProjectController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // get all projects data including name and public_key
+    // and embed entities inside each project
     // can only be called from StarfallCMS only(must be login)
     async index({response}){
-        response.json(await Project.all());
+        response.json(await Project.with('entities').fetch());
     }
 
     /**
@@ -73,8 +74,7 @@ class ProjectController {
             const subscription = Ws.getChannel('project').topic('project');
             if(Boolean(subscription)){
                 subscription.broadcast('delete', {
-                    _id: project._id, 
-                    name: project.name
+                    _id: project._id
                 });
             }
         }
@@ -101,7 +101,6 @@ class ProjectController {
             Logger.info(`rename project with id ${id} into ${name}`);
             
             const project = await Project.findOrFail(id);
-            const oldname = project.name;
             project.name = name;
             await project.save();
 
@@ -110,8 +109,9 @@ class ProjectController {
             const subscription = Ws.getChannel('project').topic('project');
             if(Boolean(subscription)){
                 subscription.broadcast('rename', {
-                    old_name: oldname,
-                    ...project.toJSON()
+                    _id: project._id,
+                    name: project.name,
+                    updated: project.update_at
                 });
             }
         }
