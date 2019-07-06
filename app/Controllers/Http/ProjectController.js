@@ -112,7 +112,7 @@ class ProjectController {
                 topic.broadcast('rename', {
                     _id: project._id,
                     name: project.name,
-                    updated: project.update_at
+                    update_at: project.update_at
                 });
             }
         }
