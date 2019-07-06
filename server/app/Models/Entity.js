@@ -6,8 +6,7 @@ const Model = use('Model')
 class Entity extends Model {
     static boot(){
         super.boot();
-        this.addHook('beforeCreate', 'EntityHook.beforeCreate');
-        this.addHook('beforeUpdate', 'EntityHook.beforeUpdate');
+        this.addHook('afterCreate', 'EntityHook.afterCreate');
         this.addHook('beforeDelete', 'EntityHook.beforeDelete');
     }
 
