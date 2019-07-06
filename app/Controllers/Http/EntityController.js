@@ -5,50 +5,15 @@ const Entity = use('App/Models/Entity');
 /** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const Project = use('App/Models/Project');
 
-/** @type {import('lucid-mongo/src/Database')} */
-const Database = use('Database');
-
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
+/** @type {import('@adonisjs/websocket/src/Ws')} */
 const Ws = use('Ws');
+/** @type {import('@adonisjs/websocket/src/Channel')} */
+const channel = Ws.getChannel('entity');
 
 class EntityController {
-    /**
-    * @param {object} ctx
-    * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    */
-    // get all available entities
-    // can only be called from StarfallCMS only(must be login)
-    async index({response}){
-        response.json(await Entity.all());
-    }
-
-    /**
-    * @param {object} ctx
-    * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    */
-    // get all available entities
-    // can only be called from StarfallCMS only(must be login)
-    async entities({response, params}){
-        const id = params.id;
-
-        try{
-            Logger.info(`Get all entities inside project with id ${id}`);
-
-            // check project is exist or not
-            const project = await Project.findOrFail(id);
-            response.json(await project.entities().fetch());
-            Logger.info('succeed fetching entities');
-        }
-        catch(error){
-            Logger.warning('Fail to get all entities inside project');
-            Logger.warning(error);
-            response.internalServerError('Fail to get all entities inside project');
-            return;
-        }
-    }
-    
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
@@ -75,9 +40,9 @@ class EntityController {
 
             response.ok('succeed create new entity');
 
-            const subscription = Ws.getChannel('entity').topic('entity');
-            if(Boolean(subscription)){
-                subscription.broadcast('add', {
+            const topic = channel.topic('entity');
+            if(topic){
+                topic.broadcast('add', {
                     project_id: project.id,
                     ...entity.toJSON()
                 });
@@ -107,11 +72,11 @@ class EntityController {
             const entity = await Entity.findOrFail(id);
 
             await entity.delete();
-            response.ok('succeed delete');
+            response.ok('succeed deleting entity');
 
-            const subscription = Ws.getChannel('entity').topic('entity');
-            if(Boolean(subscription)){
-                subscription.broadcast('delete', {
+            const topic = channel.topic('entity');
+            if(topic){
+                topic.broadcast('delete', {
                     _id: entity._id
                 });
             }    
@@ -151,9 +116,9 @@ class EntityController {
 
             response.ok('succeed rename entity');
 
-            const subscription = Ws.getChannel('entity').topic('entity');
-            if(Boolean(subscription)){
-                subscription.broadcast('rename', {
+            const topic = channel.topic('entity');
+            if(topic){
+                topic.broadcast('rename', {
                     project_id: project._id,
                     ...entity.toJSON()
                 });

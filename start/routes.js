@@ -26,11 +26,6 @@ Route.group(function(){
 
     // routes for Projects
     Route.get('project', 'ProjectController.index');
-
-    // routes for Entity
-    Route.get('entity', 'EntityController.index');
-    Route.get('entity/:id', 'EntityController.entities');
-
 }).prefix('api').middleware('authAll');
 
 Route.group(function(){
@@ -40,8 +35,6 @@ Route.group(function(){
     Route.delete(':id', 'UserController.delete');
     Route.post('signin', 'UserController.signin');
     Route.post('signout', 'UserController.signout');
-
-    // routes for get entity data
 }).prefix('api/user');
 
 // routes group with creator only auth
@@ -59,7 +52,6 @@ Route.group(function(){
     Route.post(':id', 'EntityController.add');
     Route.delete(':id', 'EntityController.delete');
     Route.post(':id/rename', 'EntityController.rename');
-
 }).prefix('api/entity').middleware('authNonUser');
 
 // routes group for public access
