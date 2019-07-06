@@ -18,9 +18,9 @@ const Logger = use('Logger');
 const Ws = use('Ws');
 
 Ws.channel('project', ({ socket }) => {
-    Logger.info(`user joined with ${socket.id} socket id(project)`);
+    Logger.info(`user joined with ${socket.id} topic project`);
 }).middleware(['authAll']);
 
 Ws.channel('entity', ({ socket }) => {
-    Logger.info(`user joined with ${socket.id} socket id(entity)`);
+    Logger.info(`user joined with ${socket.id} topic entity`);
 }).middleware(['authAll']);

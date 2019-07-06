@@ -1,9 +1,10 @@
 'use strict'
 /** @typedef {import('lucid-mongo/src/LucidMongo/Model')} Model*/
+/** @typedef {typeof import('lucid-mongo/src/LucidMongo/Model')} ModelType*/
 
 const crypto = require('crypto');
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {ModelType} */
 const Entity = use('App/Models/Entity');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
