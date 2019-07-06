@@ -1,14 +1,15 @@
 'use strict'
 
 /** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
-const Entity = use('App/Models/Entity');
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
+/** @type {import('@adonisjs/websocket/src/Ws')} */
 const Ws = use('Ws');
+/** @type {import('@adonisjs/websocket/src/Channel')} */
+const channel = Ws.getChannel('project');
 
 class ProjectController {
     /**
@@ -42,9 +43,9 @@ class ProjectController {
             Logger.info(`${name}: ${project.public_key}`);
             response.ok('succeed create new project');
             
-            const subscription = Ws.getChannel('project').topic('project');
-            if(Boolean(subscription)){
-                subscription.broadcast('add', project);
+            const topic = channel.topic('project');
+            if(topic){
+                topic.broadcast('add', project);
             }
         }
         catch(error){
@@ -69,11 +70,11 @@ class ProjectController {
             
             const project = await Project.findOrFail(id);
             await project.delete();
-            response.ok('succeed delete');
+            response.ok('succeed deleting project');
 
-            const subscription = Ws.getChannel('project').topic('project');
-            if(Boolean(subscription)){
-                subscription.broadcast('delete', {
+            const topic = channel.topic('project');
+            if(topic){
+                topic.broadcast('delete', {
                     _id: project._id
                 });
             }
@@ -106,9 +107,9 @@ class ProjectController {
 
             response.ok('succeed rename project');
 
-            const subscription = Ws.getChannel('project').topic('project');
-            if(Boolean(subscription)){
-                subscription.broadcast('rename', {
+            const topic = channel.topic('project');
+            if(topic){
+                topic.broadcast('rename', {
                     _id: project._id,
                     name: project.name,
                     updated: project.update_at
