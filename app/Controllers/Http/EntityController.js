@@ -36,6 +36,7 @@ class EntityController {
             // insert
             const entity = new Entity();
             entity.name = name;
+            entity.schema = {};
             await project.entities().save(entity);
 
             response.ok('succeed create new entity');
@@ -119,8 +120,9 @@ class EntityController {
             const topic = channel.topic('entity');
             if(topic){
                 topic.broadcast('rename', {
-                    project_id: project._id,
-                    ...entity.toJSON()
+                    _id: entity._id,
+                    name: entity.name,
+                    updated_at: entity.updated_at
                 });
             }    
         }
@@ -128,6 +130,43 @@ class EntityController {
             Logger.warning('Fail to rename entity');
             Logger.warning(error);
             response.internalServerError('Fail to rename entity');
+            return;
+        }
+    }
+
+    /**
+    * @param {object} ctx
+    * @param {import('@adonisjs/framework/src/Request')} ctx.request
+    * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    */
+    // set schema for entity with id
+    async schema({response, request, params}){
+        const id = params.id;
+        const {schema} = request.post();
+
+        try{
+            Logger.info(`set entity schema ${id}`);
+        
+            // set
+            const entity = new Entity();
+            entity.schema = schema;
+            await entity.save();
+
+            response.ok('succeed set entity schema');
+
+            const topic = channel.topic('entity');
+            if(topic){
+                topic.broadcast('schema', {
+                    _id: entity._id,
+                    schema: entity.schema,
+                    updated_at: entity.updated_at
+                });
+            }    
+        }
+        catch(error){
+            Logger.warning('Fail to set entity schema');
+            Logger.warning(error);
+            response.internalServerError('Fail to set entity schema');
             return;
         }
     }
