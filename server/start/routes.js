@@ -52,6 +52,7 @@ Route.group(function(){
     Route.post(':id', 'EntityController.add');
     Route.delete(':id', 'EntityController.delete');
     Route.post(':id/rename', 'EntityController.rename');
+    Route.post(':id', 'EntityController.schema');
 }).prefix('api/entity').middleware('authNonUser');
 
 // routes group for public access
