@@ -18,7 +18,7 @@ class AuthAll {
 			await auth.check();
 		}
 		catch(error){
-			Logger.info('Need to be authorized to proceed');
+			Logger.warning('Need to be authorized to proceed');
 			response.unauthorized('Need to be authorized to proceed');
 			return;
 		}
