@@ -52,8 +52,17 @@ Route.group(function(){
     Route.post(':id', 'EntityController.add');
     Route.delete(':id', 'EntityController.delete');
     Route.post(':id/rename', 'EntityController.rename');
-    Route.post(':id', 'EntityController.schema');
+    Route.post(':id/schema', 'EntityController.schema');
 }).prefix('api/entity').middleware('authNonUser');
+
+// routes group with all auth
+// routes for Document
+Route.group(function(){
+    Route.get(':id', 'DocumentController.index');
+    Route.post(':id', 'DocumentController.add');
+    Route.post(':id/modify', 'DocumentController.modify');
+    Route.delete('', 'DocumentController.delete');
+}).prefix('api/document').middleware('authAll');
 
 // routes group for public access
 // need KEY API

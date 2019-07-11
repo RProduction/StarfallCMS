@@ -148,7 +148,7 @@ class EntityController {
             Logger.info(`set entity schema ${id}`);
         
             // set
-            const entity = new Entity();
+            const entity = await Entity.findOrFail(id);
             entity.schema = schema;
             await entity.save();
 

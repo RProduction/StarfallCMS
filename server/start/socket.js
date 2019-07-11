@@ -24,3 +24,7 @@ Ws.channel('project', ({ socket }) => {
 Ws.channel('entity', ({ socket }) => {
     Logger.info(`user joined with ${socket.id} topic entity`);
 }).middleware(['authAll']);
+
+Ws.channel('document', ({ socket }) => {
+    Logger.info(`user joined with ${socket.id} topic document`);
+}).middleware(['authAll']);
