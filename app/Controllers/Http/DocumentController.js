@@ -122,28 +122,17 @@ class DocumentController {
 
         try{
             Logger.info(`delete documents`);
-
-            // loop through ids to delete
-            let deleted = [];
-            for(let index in ids){
-                Logger.info(`find document with id ${ids[index]}`);
-                const document = await Document.find(ids[index]);
-                if(document){
-                    Logger.info(`delete document with id ${ids[index]}`);
-                    await document.delete();
-                    deleted.push(ids[index]);
-                }
-            };
+            const count = await Document.query().whereIn('_id', ids).delete();
 
             // send count of deleted document
             response.ok({
                 msg: 'succeed deleting documents', 
-                count: deleted.length
+                count: count
             });
 
             const topic = channel.topic('document');
             if(topic){
-                topic.broadcast('delete', {ids: deleted});
+                topic.broadcast('delete', {ids: ids});
             }
         }
         catch(error){
