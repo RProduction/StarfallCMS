@@ -31,27 +31,27 @@ Route.group(function(){
 Route.group(function(){
     // routes for User Authentication
     Route.get('status', 'UserController.status');
-    Route.post('', 'UserController.add');
+    Route.post('', 'UserController.add').validator('signup');
     Route.delete(':id', 'UserController.delete');
-    Route.post('signin', 'UserController.signin');
+    Route.post('signin', 'UserController.signin').validator('signin');
     Route.post('signout', 'UserController.signout');
 }).prefix('api/user');
 
 // routes group with creator only auth
 // routes for Projects
 Route.group(function(){
-    Route.post('', 'ProjectController.add');
+    Route.post('', 'ProjectController.add').validator('project');
     Route.delete(':id', 'ProjectController.delete');
-    Route.post(':id/rename', 'ProjectController.rename');
+    Route.post(':id/rename', 'ProjectController.rename').validator('project');
 
 }).prefix('api/project').middleware('authNonUser');
 
 // routes group with creator and manager only auth
 // routes for Entity
 Route.group(function(){
-    Route.post(':id', 'EntityController.add');
+    Route.post(':id', 'EntityController.add').validator('entity');
     Route.delete(':id', 'EntityController.delete');
-    Route.post(':id/rename', 'EntityController.rename');
+    Route.post(':id/rename', 'EntityController.rename').validator('entity');
     Route.post(':id/schema', 'EntityController.schema');
 }).prefix('api/entity').middleware('authNonUser');
 

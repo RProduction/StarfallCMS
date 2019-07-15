@@ -26,7 +26,9 @@
     "@adonisjs/ignitor": "^2.0.8",
     "@adonisjs/session": "^1.0.27",
     "@adonisjs/shield": "^1.0.8",
+    "@adonisjs/validator": "^5.0.6",
     "@adonisjs/websocket": "^1.0.11",
+    "indicative": "^7.2.0",
     "lucid-mongo": "^3.1.5"
   },
   "devDependencies": {},
