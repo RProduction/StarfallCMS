@@ -7,8 +7,8 @@ class signin {
 	get rules() {
 		return {
 			// validation rules
-			username: "required|regex:['^[a-zA-Z0-9]*$']",
-			password: "required|regex:['^[a-zA-Z0-9]*$']"
+			username: "required|regex:[a-zA-Z0-9]*$",
+			password: "required|regex:[a-zA-Z0-9]*$"
 		}
 	}
 
