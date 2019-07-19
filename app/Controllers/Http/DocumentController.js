@@ -25,10 +25,10 @@ class DocumentController {
         try{
             Logger.info(`fetch documents in entity with id ${id}`);
             const entity = await Entity.findOrFail(id);
-            response.json(await entity.documents().fetch());
+            return response.json(await entity.documents().fetch());
         }catch(err){
             Logger.warning(`fail to fetch documents in entity with id ${id}`);
-            response.notFound(`entity with id ${id} not found`);
+            return response.notFound(`entity with id ${id} not found`);
         }
     }
 
@@ -65,8 +65,7 @@ class DocumentController {
         catch(error){
             Logger.warning('Fail to add new document');
             Logger.warning(error);
-            response.internalServerError('Fail to add new document');
-            return;
+            return response.internalServerError('Fail to add new document');
         }
     }
 
@@ -104,8 +103,7 @@ class DocumentController {
         catch(error){
             Logger.warning('Fail to modify document');
             Logger.warning(error);
-            response.internalServerError('Fail to modify document');
-            return;
+            return response.internalServerError('Fail to modify document');
         }
     }
 
@@ -138,8 +136,7 @@ class DocumentController {
         catch(error){
             Logger.warning('Fail to delete document');
             Logger.warning(error);
-            response.internalServerError('Fail to delete documents');
-            return;
+            return response.internalServerError('Fail to delete documents');
         }
     }
 }

@@ -22,8 +22,7 @@ class AuthNonUser {
         catch(error){
 			Logger.warning('Need creator or manager authorization to proceed');
 			Logger.warning(error);
-            response.unauthorized('Need creator or manager authorization to proceed');
-            return;
+            return response.unauthorized('Need creator or manager authorization to proceed');
 		}
 		
 		await next();

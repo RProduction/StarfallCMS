@@ -13,36 +13,35 @@ class AuthAll {
 	* @param {Auth} ctx.auth
 	* @param {Function} next
 	*/
-  	async handle ({ auth, response }, next) {
-		try{
+	async handle({ auth, response }, next) {
+		try {
 			await auth.check();
 		}
-		catch(error){
+		catch (error) {
 			Logger.warning('Need to be authorized to proceed');
-			response.unauthorized('Need to be authorized to proceed');
+			return response.unauthorized('Need to be authorized to proceed');
+		}
+
+		await next();
+	}
+
+	/**
+  * @param {object} ctx
+  * @param {Response} ctx.response
+  * @param {Auth} ctx.auth
+  * @param {Function} next
+  */
+	async wsHandle({ auth }, next) {
+		try {
+			await auth.check();
+		}
+		catch (error) {
+			Logger.info('Need to be authorized to proceed');
 			return;
 		}
 
 		await next();
-	  }
-	  
-	  /**
-	* @param {object} ctx
-	* @param {Response} ctx.response
-	* @param {Auth} ctx.auth
-	* @param {Function} next
-	*/
-	  async wsHandle({ auth}, next){
-		  try {
-			  await auth.check();
-		  }
-		  catch (error) {
-			  Logger.info('Need to be authorized to proceed');
-			  return;
-		  }
-
-		  await next();
-	  }
+	}
 }
 
 module.exports = AuthAll

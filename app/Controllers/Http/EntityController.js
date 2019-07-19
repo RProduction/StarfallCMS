@@ -52,8 +52,7 @@ class EntityController {
         catch(error){
             Logger.warning('Fail to create new entity');
             Logger.warning(error);
-            response.internalServerError('Fail to create new entity');
-            return;
+            return response.internalServerError('Fail to create new entity');
         }
     }
 
@@ -85,8 +84,7 @@ class EntityController {
         catch(error){
             Logger.warning('Fail to delete entity');
             Logger.warning(error);
-            response.internalServerError('Fail to delete entity');
-            return;
+            return response.internalServerError('Fail to delete entity');
         }
     }
 
@@ -129,8 +127,7 @@ class EntityController {
         catch(error){
             Logger.warning('Fail to rename entity');
             Logger.warning(error);
-            response.internalServerError('Fail to rename entity');
-            return;
+            return response.internalServerError('Fail to rename entity');
         }
     }
 
@@ -166,8 +163,7 @@ class EntityController {
         catch(error){
             Logger.warning('Fail to set entity schema');
             Logger.warning(error);
-            response.internalServerError('Fail to set entity schema');
-            return;
+            return response.internalServerError('Fail to set entity schema');
         }
     }
 }

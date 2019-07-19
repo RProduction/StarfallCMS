@@ -22,8 +22,7 @@ class AuthCreator {
 		catch(error){
 			Logger.warning('Need creator authorization to proceed');
 			Logger.warning(error);
-			response.unauthorized('Need creator authorization to proceed');
-			return;
+			return response.unauthorized('Need creator authorization to proceed');
 		}
 
 		await next();

@@ -20,7 +20,7 @@ class ProjectController {
     // and embed entities inside each project
     // can only be called from StarfallCMS only(must be login)
     async index({response}){
-        response.json(await Project.with('entities').fetch());
+        return response.json(await Project.with('entities').fetch());
     }
 
     /**
@@ -51,8 +51,7 @@ class ProjectController {
         catch(error){
             Logger.warning('Fail to create new project');
             Logger.warning(error);
-            response.internalServerError('Fail to create new project');
-            return;
+            return response.internalServerError('Fail to create new project');
         }
     }
 
@@ -82,8 +81,7 @@ class ProjectController {
         catch(error){
             Logger.warning('Fail to delete project');
             Logger.warning(error);
-            response.internalServerError('Fail to delete project');
-            return;
+            return response.internalServerError('Fail to delete project');
         }
     }
 
@@ -119,8 +117,7 @@ class ProjectController {
         catch(error){
             Logger.warning('Fail to rename project');
             Logger.warning(error);
-            response.internalServerError('Fail to rename project');
-            return;
+            return response.internalServerError('Fail to rename project');
         }
     }
 }

@@ -18,7 +18,7 @@ class UserController {
     // get all available users
     // can only be called from StarfallCMS only(must be login)
     async index({response}){
-        response.json(await User.all());
+        return response.json(await User.all());
     }
 
     /**
@@ -73,8 +73,7 @@ class UserController {
         const status = await this.status(ctx);
         if(status === -1 || status === 1){
             Logger.warning("Cannot add user");
-            response.internalServerError('Cannot add user');
-            return;
+            return response.internalServerError('Cannot add user');
         }
 
         const {password, username, authority} = request.post();
@@ -89,13 +88,12 @@ class UserController {
             user.authority = authority;
             await user.save();
 
-            response.ok('succeed create new user');
+            return response.ok('succeed create new user');
         }
         catch(error){
             Logger.warning('Fail to create new user');
             Logger.warning(error);
-            response.internalServerError('Fail to create new user');
-            return;
+            return response.internalServerError('Fail to create new user');
         }
     }
 
@@ -109,8 +107,7 @@ class UserController {
         const status = await this.status(auth);
         if(status === -1 || status === 1 || status === 0){
             Logger.warning("Cannot delete user");
-            response.internalServerError('Cannot delete user');
-            return;
+            return response.internalServerError('Cannot delete user');
         }
 
         const id = params.id;
@@ -119,13 +116,12 @@ class UserController {
             Logger.info(`delete user with id ${id}`);
             const user = await User.findOrFail(id);
             await user.delete();
-            response.ok('delete user');
+            return response.ok('delete user');
         }
         catch(error){
             Logger.warning('Fail to delete user');
             Logger.warning(error);
-            response.internalServerError('Fail to delete user');
-            return;
+            return response.internalServerError('Fail to delete user');
         }
     }
 
@@ -141,13 +137,12 @@ class UserController {
         try{
             Logger.info(`username: ${username}, password: ${password}`);
             await auth.attempt(username, password);
-            response.ok('succeed login');
+            return response.ok('succeed login');
         }
         catch(error){
             Logger.warning('Fail to login');
             Logger.warning(error);
-            response.internalServerError('Fail to login');
-            return;
+            return response.internalServerError('Fail to login');
         }
     }
 
@@ -160,13 +155,12 @@ class UserController {
         try{
             Logger.info(`logout`);
             await auth.logout();
-            response.ok('succeed logout');
+            return response.ok('succeed logout');
         }
         catch(error){
             Logger.warning('Fail to logout');
             Logger.warning(error);
-            response.internalServerError('Fail to logout');
-            return;
+            return response.internalServerError('Fail to logout');
         }
     }
 }
