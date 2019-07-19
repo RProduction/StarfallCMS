@@ -7,7 +7,7 @@ class project {
 	get rules() {
 		return {
 			// validation rules
-			name: "required|min:1|max:50|regex:['^[a-zA-Z0-9_]+$']|unique:projects, name"
+			name: "required|min:1|max:50|regex:^[a-zA-Z0-9_]+$|unique:projects, name"
 		}
 	}
 
