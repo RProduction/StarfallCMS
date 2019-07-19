@@ -135,7 +135,7 @@ function CompareSchema(oldSchema, newSchema, query){
 /** @param {Model} modelInstance*/
 // hook for update document.data key and value after schema change
 EntityHook.beforeUpdate = async (modelInstance) => {
-    if(modelInstance.schema.dirty){
+    if(modelInstance.dirty.schema){
         let query = {$set: {}, $unset: {}};
         CompareSchema(
             modelInstance.$originalAttributes.schema, 
