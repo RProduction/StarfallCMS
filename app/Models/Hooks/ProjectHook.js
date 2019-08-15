@@ -10,6 +10,8 @@ const Entity = use('App/Models/Entity');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
+const Drive = use('Drive');
+
 const ProjectHook = exports = module.exports = {}
 
 /** @param {Model} modelInstance*/
@@ -28,6 +30,10 @@ ProjectHook.beforeDelete = async (modelInstance) => {
         const temp = await Entity.find(entity._id);
         if(temp) await temp.delete();
     }
+
+    // delete project files folder if exist
+    if(await Drive.exists(`${modelInstance._id}`))
+        await Drive.delete(`${modelInstance._id}`);
 
     Logger.info(`delete all entities(${entities.length}) in project ${modelInstance.name}`);
 }
