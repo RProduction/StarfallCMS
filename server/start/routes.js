@@ -26,7 +26,7 @@ Route.group(function(){
 
     // routes for Projects
     Route.get('project', 'ProjectController.index');
-}).prefix('api').middleware('authAll');
+}).middleware('authAll');
 
 Route.group(function(){
     // routes for User Authentication
@@ -35,7 +35,7 @@ Route.group(function(){
     Route.delete(':id', 'UserController.delete');
     Route.post('signin', 'UserController.signin').validator('signin');
     Route.post('signout', 'UserController.signout');
-}).prefix('api/user');
+}).prefix('user');
 
 // routes group with creator only auth
 // routes for Projects
@@ -44,7 +44,7 @@ Route.group(function(){
     Route.delete(':id', 'ProjectController.delete');
     Route.post(':id/rename', 'ProjectController.rename').validator('project');
 
-}).prefix('api/project').middleware('authNonUser');
+}).prefix('project').middleware('authNonUser');
 
 // routes group with creator and manager only auth
 // routes for Entity
@@ -53,7 +53,7 @@ Route.group(function(){
     Route.delete(':id', 'EntityController.delete');
     Route.post(':id/rename', 'EntityController.rename').validator('entity');
     Route.post(':id/schema', 'EntityController.schema');
-}).prefix('api/entity').middleware('authNonUser');
+}).prefix('entity').middleware('authNonUser');
 
 // routes group with all auth
 // routes for Document
@@ -62,7 +62,7 @@ Route.group(function(){
     Route.post(':id', 'DocumentController.add');
     Route.post(':id/modify', 'DocumentController.modify');
     Route.delete('', 'DocumentController.delete');
-}).prefix('api/document').middleware('authAll');
+}).prefix('document').middleware('authAll');
 
 // routes group for public access
 // need KEY API

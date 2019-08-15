@@ -7,10 +7,14 @@ const Document = use('App/Models/Document');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
+const Helpers = use('Helpers');
+
 /** @type {import('@adonisjs/websocket/src/Ws')} */
 const Ws = use('Ws');
 /** @type {import('@adonisjs/websocket/src/Channel')} */
 const channel = Ws.getChannel('document');
+
+const Drive = use('Drive');
 
 class DocumentController {
     /**
@@ -40,9 +44,12 @@ class DocumentController {
     // add new document into table of
     // need parameter entity id as collection name
     // can only be called from StarfallCMS only(must be login)
+    // accept data and files[]
     async add({request, response, params}){
         const id = params.id;
-        const {data} = request.post();
+        let {data} = request.post();
+        const files = request.file('files');
+        data = JSON.parse(data);
 
         try{
             Logger.info(`add new document into entity ${id}`);
@@ -54,8 +61,17 @@ class DocumentController {
             const document = new Document();
             document.data = data;
             await entity.documents().save(document);
-            
-            response.ok('succeed adding new document');
+
+            // process files
+            const path = `${entity.project_id}/${entity._id}/${document._id}`;
+            await files.moveAll(Helpers.tmpPath(path));
+
+            if (!files.movedAll()) {
+                throw files.errors();
+            }
+
+            // return document id
+            response.ok({msg: 'succeed adding new document', id: document._id});
             
             const topic = channel.topic('document');
             if(topic){
@@ -77,9 +93,12 @@ class DocumentController {
     // change existing document data
     // need parameter document id
     // can only be called from StarfallCMS only(must be login)
+    // accept data and files[]
     async modify({request, response, params}){
         const id = params.id;
-        const {data} = request.post();
+        let {data} = request.post();
+        const files = request.file('files');
+        data = JSON.parse(data);
 
         try{
             Logger.info(`modify existing document with id: ${id}`);
@@ -88,6 +107,15 @@ class DocumentController {
             const document = await Document.findOrFail(id);
             document.data = data;
             await document.save();
+
+            // process files
+            const entity = await Entity.find(document.entity_id);
+            const path = `${entity.project_id}/${entity._id}/${document._id}`;
+            await files.moveAll(Helpers.tmpPath(path));
+
+            if (!files.movedAll()) {
+                throw files.errors();
+            }
 
             response.ok('succeed modify existing document');
             
@@ -119,8 +147,22 @@ class DocumentController {
         const {ids} = request.post();
 
         try{
+            if(ids.length === 0) throw('No documents to be deleted');
+
+            // get project id, and entity id
+            let entity = await Document.find(ids[0]);
+            entity = await Entity.find(entity.entity_id);
+
             Logger.info(`delete documents`);
             const count = await Document.query().whereIn('_id', ids).delete();
+
+            // loop ids
+            // delete folder project/entity/document if exist
+            for(const id of ids){
+                const path = `${entity.project_id}/${entity._id}/${id}`;
+                if(await Drive.exists(path))
+                    await Drive.delete(path);
+            }
 
             // send count of deleted document
             response.ok({

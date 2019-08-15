@@ -3,9 +3,6 @@
 /** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
 const User = use('App/Models/User');
 
-/** @type {import('lucid-mongo/src/Database')} */
-const Database = use('Database');
-
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
