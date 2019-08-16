@@ -44,12 +44,10 @@ class DocumentController {
     // add new document into table of
     // need parameter entity id as collection name
     // can only be called from StarfallCMS only(must be login)
-    // accept data and files[]
+    // accept data
     async add({request, response, params}){
         const id = params.id;
         let {data} = request.post();
-        const files = request.file('files');
-        data = JSON.parse(data);
 
         try{
             Logger.info(`add new document into entity ${id}`);
@@ -61,14 +59,6 @@ class DocumentController {
             const document = new Document();
             document.data = data;
             await entity.documents().save(document);
-
-            // process files
-            const path = `${entity.project_id}/${entity._id}/${document._id}`;
-            await files.moveAll(Helpers.tmpPath(path));
-
-            if (!files.movedAll()) {
-                throw files.errors();
-            }
 
             // return document id
             response.ok({msg: 'succeed adding new document', id: document._id});
@@ -93,12 +83,10 @@ class DocumentController {
     // change existing document data
     // need parameter document id
     // can only be called from StarfallCMS only(must be login)
-    // accept data and files[]
+    // accept data
     async modify({request, response, params}){
         const id = params.id;
         let {data} = request.post();
-        const files = request.file('files');
-        data = JSON.parse(data);
 
         try{
             Logger.info(`modify existing document with id: ${id}`);
@@ -107,15 +95,6 @@ class DocumentController {
             const document = await Document.findOrFail(id);
             document.data = data;
             await document.save();
-
-            // process files
-            const entity = await Entity.find(document.entity_id);
-            const path = `${entity.project_id}/${entity._id}/${document._id}`;
-            await files.moveAll(Helpers.tmpPath(path));
-
-            if (!files.movedAll()) {
-                throw files.errors();
-            }
 
             response.ok('succeed modify existing document');
             
