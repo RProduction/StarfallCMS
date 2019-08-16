@@ -19,12 +19,12 @@ const Ws = use('Ws');
 
 Ws.channel('project', ({ socket }) => {
     Logger.info(`user joined with ${socket.id} topic project`);
-}).middleware(['authAll']);
+}).middleware(['auth']);
 
 Ws.channel('entity', ({ socket }) => {
     Logger.info(`user joined with ${socket.id} topic entity`);
-}).middleware(['authAll']);
+}).middleware(['auth']);
 
 Ws.channel('document', ({ socket }) => {
     Logger.info(`user joined with ${socket.id} topic document`);
-}).middleware(['authAll']);
+}).middleware(['auth']);
