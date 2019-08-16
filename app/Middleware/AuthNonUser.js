@@ -17,7 +17,7 @@ class AuthNonUser {
 		try{
             const user = await auth.getUser();
             Logger.info(user.authority);
-			if(user.authority === 'User') throw('');
+			if(user.authority === 'User') throw '';
         }
         catch(error){
 			Logger.warning('Need creator or manager authorization to proceed');

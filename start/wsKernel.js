@@ -33,7 +33,7 @@ const globalMiddleware = [
 | Ws.channel('chat', 'ChatController').middleware(['auth'])
 */
 const namedMiddleware = {
-    authAll: 'App/Middleware/AuthAll'
+    auth: 'Adonis/Middleware/Auth'
 }
 
 
