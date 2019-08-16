@@ -9,7 +9,7 @@ class signup {
 			// validation rules
 			username: "required|min:5|max:30|regex:^[a-zA-Z0-9]*$",
 			password: "required|min:5|max:30|regex:^[a-zA-Z0-9]*$",
-			authority: "required|in:['Creator', 'Manager', 'User']"
+			authority: "required|in:Creator,Manager,User"
 		}
 	}
 

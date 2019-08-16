@@ -70,10 +70,6 @@ EntityHook.beforeUpdate = async (modelInstance) => {
             }else if(value.kind === 'D'){
                 // if delete property in object
                 query.$unset[key] = '';
-            }else if(value.item.kind === 'N'){
-
-            }else if(value.item.kind === 'D'){
-
             }
         });
         

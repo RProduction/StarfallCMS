@@ -5,6 +5,10 @@ const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
+/** @type {import('@adonisjs/framework/src/Env')} */
+const Env = use('Env');
+
+const Helpers = use('Helpers');
 
 /** @type {import('@adonisjs/websocket/src/Ws')} */
 const Ws = use('Ws');
@@ -35,9 +39,10 @@ class ProjectController {
 
         try{
             Logger.info(`create new project ${name}`);
-
+            
             const project = new Project();
             project.name = name;
+            project.img_url = '';
             await project.save();
 
             Logger.info(`${name}: ${project.public_key}`);
@@ -118,6 +123,56 @@ class ProjectController {
             Logger.warning('Fail to rename project');
             Logger.warning(error);
             return response.internalServerError('Fail to rename project');
+        }
+    }
+
+    /**
+    * @param {object} ctx
+    * @param {import('@adonisjs/framework/src/Request')} ctx.request
+    * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    */
+    // change image for existing project
+    // only creator can change image for existing project
+    async img({request, response, params}){
+        const id = params.id;
+        const img = request.file('img', {
+            types: ['image'],
+            size: '10mb'
+        });
+
+        try{
+            Logger.info(`change img for project with id ${id}`);
+            // process image
+            const path = `bin/${id}`;
+            await img.move(Helpers.publicPath(path), {
+                name: 'img',
+                overwrite: true
+            });
+
+            if (!img.moved()) {
+                throw files.errors();
+            }
+
+            // change img_url in database
+            const project = await Project.findOrFail(id);
+            project.img_url = `${Env.get('APP_URL')}/${path}/img`;
+            await project.save();
+
+            response.ok('succeed change img for project');
+
+            const topic = channel.topic('project');
+            if(topic){
+                topic.broadcast('img', {
+                    _id: project._id,
+                    img_url: project.img_url,
+                    updated_at: project.updated_at
+                });
+            }
+        }
+        catch(error){
+            Logger.warning('Fail to change image for project');
+            Logger.warning(error);
+            return response.internalServerError('Fail to change image for project');
         }
     }
 }
