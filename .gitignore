@@ -6,7 +6,8 @@ package-lock.json
 tmp
 
 # Adonis directory for storing binary files
-public/bin
+public/img
+storage
 
 # Environment variables, never commit this file
 .env
