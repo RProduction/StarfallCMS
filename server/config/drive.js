@@ -25,7 +25,7 @@ module.exports = {
     |
     */
     local: {
-      root: Helpers.publicPath('bin'),
+      root: 'storage',
       driver: 'local'
     },
 
