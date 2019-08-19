@@ -9,7 +9,7 @@ class ProjectSchema extends Schema {
       collection.increments();
       collection.index('name', {name: 1}, {unique: true});
       collection.index('public_key', {name: 1}, {unique: true});
-      collection.string('img_url');
+      collection.string('img_type');
       collection.timestamps();
     })
   }
