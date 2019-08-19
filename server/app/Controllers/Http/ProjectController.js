@@ -5,8 +5,6 @@ const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
-/** @type {import('@adonisjs/framework/src/Env')} */
-const Env = use('Env');
 
 const Helpers = use('Helpers');
 
@@ -42,7 +40,6 @@ class ProjectController {
             
             const project = new Project();
             project.name = name;
-            project.img_url = '';
             await project.save();
 
             Logger.info(`${name}: ${project.public_key}`);
@@ -142,20 +139,20 @@ class ProjectController {
 
         try{
             Logger.info(`change img for project with id ${id}`);
+            
+            const project = await Project.findOrFail(id);
+
             // process image
-            const path = `bin/${id}`;
-            await img.move(Helpers.publicPath(path), {
-                name: 'img',
+            await img.move(Helpers.publicPath('img'), {
+                name: `${project._id}.${project.img_type}`,
                 overwrite: true
             });
 
             if (!img.moved()) {
-                throw files.errors();
+                throw img.errors();
             }
 
-            // change img_url in database
-            const project = await Project.findOrFail(id);
-            project.img_url = `${Env.get('APP_URL')}/${path}/img`;
+            project.img_type = img.subtype;
             await project.save();
 
             response.ok('succeed change img for project');

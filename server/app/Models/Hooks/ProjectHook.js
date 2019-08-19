@@ -2,6 +2,7 @@
 /** @typedef {import('lucid-mongo/src/LucidMongo/Model')} Model*/
 /** @typedef {typeof import('lucid-mongo/src/LucidMongo/Model')} ModelType*/
 
+const fs = require('fs');
 const crypto = require('crypto');
 
 /** @type {ModelType} */
@@ -11,6 +12,8 @@ const Entity = use('App/Models/Entity');
 const Logger = use('Logger');
 
 const Drive = use('Drive');
+
+const Helpers = use('Helpers');
 
 const ProjectHook = exports = module.exports = {}
 
@@ -29,6 +32,12 @@ ProjectHook.beforeDelete = async (modelInstance) => {
     for(let entity of entities){
         const temp = await Entity.find(entity._id);
         if(temp) await temp.delete();
+    }
+
+    // delete project img if exist
+    const path = `img/${modelInstance._id}.${modelInstance.img_type}`;
+    if(fs.existsSync(Helpers.publicPath(path))){
+        fs.unlinkSync(path);
     }
 
     // delete project files folder if exist
