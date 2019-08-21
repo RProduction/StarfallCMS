@@ -65,6 +65,16 @@ Route.group(function(){
     Route.delete('', 'DocumentController.delete');
 }).prefix('document').middleware('auth');
 
+// routes for Storage
+Route.group(function(){
+    Route.get(':id', 'StorageController.index');
+    Route.post(':id', 'StorageController.upload');
+    Route.post(':id/folder', 'StorageController.folder');
+    Route.post(':id/move', 'StorageController.move');
+    Route.post(':id/rename', 'StorageController.rename');
+    Route.delete(':id', 'StorageController.delete');
+}).prefix('storage').middleware('auth');
+
 // routes group for public access
 // need KEY API
 Route.group(function(){

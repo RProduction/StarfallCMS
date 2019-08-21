@@ -28,3 +28,7 @@ Ws.channel('entity', ({ socket }) => {
 Ws.channel('document', ({ socket }) => {
     Logger.info(`user joined with ${socket.id} topic document`);
 }).middleware(['auth']);
+
+Ws.channel('storage', ({ socket }) => {
+    Logger.info(`user joined with ${socket.id} topic storage`);
+}).middleware(['auth']);
