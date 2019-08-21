@@ -144,7 +144,7 @@ class ProjectController {
 
             // process image
             await img.move(Helpers.publicPath('img'), {
-                name: `${project._id}.${project.img_type}`,
+                name: `${project._id}.${img.subtype}`,
                 overwrite: true
             });
 

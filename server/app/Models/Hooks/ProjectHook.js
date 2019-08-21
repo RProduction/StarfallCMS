@@ -2,7 +2,7 @@
 /** @typedef {import('lucid-mongo/src/LucidMongo/Model')} Model*/
 /** @typedef {typeof import('lucid-mongo/src/LucidMongo/Model')} ModelType*/
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const crypto = require('crypto');
 
 /** @type {ModelType} */
@@ -36,8 +36,8 @@ ProjectHook.beforeDelete = async (modelInstance) => {
 
     // delete project img if exist
     const path = `img/${modelInstance._id}.${modelInstance.img_type}`;
-    if(fs.existsSync(Helpers.publicPath(path))){
-        fs.unlinkSync(path);
+    if(await fs.exists(Helpers.publicPath(path))){
+        await fs.unlink(path);
     }
 
     // delete project files folder if exist
