@@ -10,8 +10,6 @@ const Database = use('Database');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
-const Drive = use('Drive');
-
 const {diff} = require('deep-diff');
 
 const EntityHook = exports = module.exports = {}
@@ -88,10 +86,5 @@ EntityHook.beforeUpdate = async (modelInstance) => {
 // hook for delete table when entity is deleted
 EntityHook.beforeDelete = async (modelInstance) => {
     await Document.where({entity_id: modelInstance._id}).delete();
-    
-    // delete entity files folder if exist
-    if(await Drive.exists(`${modelInstance.project_id}/${modelInstance._id}`))
-        await Drive.delete(`${modelInstance.project_id}/${modelInstance._id}`);
-
     Logger.info(`delete all documents in entity ${modelInstance.name}`);
 }
