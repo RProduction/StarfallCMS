@@ -7,7 +7,6 @@ tmp
 
 # Adonis directory for storing binary files
 public/img
-storage
 
 # Environment variables, never commit this file
 .env

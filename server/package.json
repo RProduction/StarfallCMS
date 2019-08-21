@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "adonis serve",
-    "start_dev": "adonis serve --dev --debug",
+    "dev": "adonis serve --dev --debug",
     "test": "node ace test"
   },
   "keywords": [
@@ -30,6 +30,7 @@
     "@adonisjs/validator": "^5.0.6",
     "@adonisjs/websocket": "^1.0.11",
     "deep-diff": "^1.0.2",
+    "fs-extra": "^8.1.0",
     "lucid-mongo": "^3.1.5"
   },
   "devDependencies": {},
