@@ -17,6 +17,26 @@ const Ws = use('Ws');
 /** @type {import('@adonisjs/websocket/src/Channel')} */
 const channel = Ws.getChannel('project');
 
+async function ProcessStorage(path, result){
+    const list = await fs.readdir(path,{withFileTypes: true});
+
+    for(const value of list){
+        const currentPath = `${path}/${value.name}`;
+        if(value.isDirectory()){
+            result[value.name] = {};
+            await ProcessStorage(currentPath, result[value.name]);
+        }else{
+            const stat = await fs.lstat(currentPath);
+            result[value.name] = {
+                name: value.name,
+                size: stat.size,
+                created: stat.ctime,
+                modified: stat.mtime
+            };
+        }
+    }
+}
+
 class StorageController {
     /**
     * @param {object} ctx
@@ -27,11 +47,15 @@ class StorageController {
     // receive: id(project id)
     async index({response, params}){
         const id = params.id;
+
         try{
             Logger.info(`fetch storage in project with id ${id}`);
             await Project.findOrFail(id);
+        
+            let result = {};
+            await ProcessStorage(Helpers.tmpPath(`storage/${id}`), result);
             
-            return response.json();
+            return response.json(result);
         }catch(err){
             Logger.warning(`fail to fetch storage in project with id ${id}`);
             return response.notFound(`project with id ${id} not found`);
