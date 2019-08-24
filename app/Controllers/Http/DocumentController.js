@@ -133,7 +133,7 @@ class DocumentController {
             entity = await Entity.find(entity.entity_id);
 
             Logger.info(`delete documents`);
-            const count = await Document.query().whereIn('_id', ids).delete();
+            await Document.query().whereIn('_id', ids).delete();
 
             // loop ids
             // delete folder project/entity/document if exist
@@ -143,11 +143,7 @@ class DocumentController {
                     await Drive.delete(path);
             }
 
-            // send count of deleted document
-            response.ok({
-                msg: 'succeed deleting documents', 
-                count: count
-            });
+            response.ok('succeed deleting documents');
 
             const topic = channel.topic('document');
             if(topic){
