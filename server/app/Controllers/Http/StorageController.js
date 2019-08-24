@@ -15,7 +15,7 @@ const Helpers = use('Helpers');
 /** @type {import('@adonisjs/websocket/src/Ws')} */
 const Ws = use('Ws');
 /** @type {import('@adonisjs/websocket/src/Channel')} */
-const channel = Ws.getChannel('project');
+const channel = Ws.getChannel('storage');
 
 async function ProcessStorage(path, result){
     const list = await fs.readdir(path,{withFileTypes: true});
@@ -86,12 +86,21 @@ class StorageController {
 
             // put file into destination path
             let{path} = body;
+            let files = [];
             for(const file of files){   
                 const to = path 
                     ? `${id}/${file.clientName}` 
                     : `${id}/${path}/${file.clientName}`;
 
                 await Drive.put(to, file.stream);
+                
+                const stat = await fs.lstat(Helpers.tmpPath(`storage/${to}`));
+                files.push({
+                    name: stat.name,
+                    size: stat.size,
+                    created: stat.ctime,
+                    modified: stat.mtime
+                });
             }
 
             Logger.info(`upload files into path ${path} in project ${id}`);
@@ -104,6 +113,7 @@ class StorageController {
                 topic.broadcast('upload', {
                     _id: id,
                     path: path,
+                    files: files
                 });
             }
         }
@@ -217,21 +227,23 @@ class StorageController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // rename file or folder
-    // receive: id(project id), name(full path), new name(full path)
+    // receive: id(project id), path, name, new name
     async rename({request, response, params}){
         const id = params.id;
-        const {name, new_name} = request.post();
+        const {name, new_name, path} = request.post();
+        const _name = path ? `${path}/${name}` : name;
+        const _new_name = path ? `${path}/${new_name}` : new_name ;
 
         try{
             // move folders and files to path
             await Project.findOrFail(id);
             
             Logger.info(`Rename file or folder from ${name} to ${new_name} in project ${id}`);
-            if(!await Drive.exists(`${id}/${name}`)) throw 'File or folder not exists!';
+            if(!await Drive.exists(`${id}/${_name}`)) throw 'File or folder not exists!';
             
             await fs.rename(
-                Helpers.tmpPath(`storage/${id}/${name}`), 
-                Helpers.tmpPath(`storage/${id}/${new_name}`)
+                Helpers.tmpPath(`storage/${id}/${_name}`), 
+                Helpers.tmpPath(`storage/${id}/${_new_name}`)
             );
 
             // return folder path
@@ -241,6 +253,7 @@ class StorageController {
             if(topic){
                 topic.broadcast('rename', {
                     _id: id,
+                    path: path,
                     name: name,
                     new_name: new_name
                 });
@@ -285,9 +298,9 @@ class StorageController {
             }
         }
         catch(error){
-            Logger.warning('Fail to move files and folders');
+            Logger.warning(`Fail to delete files and folders in project ${id}`);
             Logger.warning(error);
-            return response.internalServerError('Fail to move files and folders');
+            return response.internalServerError(`Fail to delete files and folders`);
         }
     }
 }
