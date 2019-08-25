@@ -85,7 +85,7 @@ class UserController {
             user.authority = authority;
             await user.save();
 
-            return response.ok('succeed create new user');
+            return response.ok({msg: 'succeed create new user', status: status});
         }
         catch(error){
             Logger.warning('Fail to create new user');
@@ -128,13 +128,17 @@ class UserController {
     * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async signin({request, auth, response}){
+    async signin(ctx){
+        const {request, auth, response} = ctx;
         const {username, password} = request.post();
 
         try{
             Logger.info(`username: ${username}, password: ${password}`);
             await auth.attempt(username, password);
-            return response.ok('succeed login');
+
+            // sign in state
+            const status = await this.status(ctx);
+            return response.ok({msg: 'succeed login', status: status});
         }
         catch(error){
             Logger.warning('Fail to login');
