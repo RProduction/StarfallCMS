@@ -32,7 +32,7 @@ Route.group(function(){
     // routes for User Authentication
     Route.get('status', 'UserController.status');
     Route.post('', 'UserController.add').validator('signup');
-    Route.delete(':id', 'UserController.delete');
+    Route.delete(':id', 'UserController.delete').middleware(['auth', 'authCreator']);
     Route.post('signin', 'UserController.signin').validator('signin');
     Route.post('signout', 'UserController.signout');
 }).prefix('user');
@@ -54,7 +54,7 @@ Route.group(function(){
     Route.delete(':id', 'EntityController.delete');
     Route.post(':id/rename', 'EntityController.rename').validator('entity');
     Route.post(':id/schema', 'EntityController.schema');
-}).prefix('entity').middleware(['auth', 'authNonUser']);
+}).prefix('entity').middleware(['auth']);
 
 // routes group with all auth
 // routes for Document

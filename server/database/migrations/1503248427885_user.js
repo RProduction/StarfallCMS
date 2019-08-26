@@ -9,7 +9,7 @@ class UserSchema extends Schema {
       collection.increments();
       collection.index('username', {username: 1}, {unique: true});
       collection.string('password', 60);
-      collection.string('authority', 10);
+      collection.boolean('is_creator');
       collection.timestamps();
     })
   }
