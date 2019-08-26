@@ -6,6 +6,11 @@ const User = use('App/Models/User');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
+const FIRST_BOOT = 0;
+const CREATOR = 1;
+const USER = 2;
+const NOT_AUTHORIZED = -1;
+
 class UserController {
     
     /**
@@ -35,26 +40,16 @@ class UserController {
             Logger.info(`User count ${usercount}`);
             if(!usercount){
                 Logger.info("First boot");
-                return 0;
+                return FIRST_BOOT;
             }
 
             const user = await auth.getUser();
-            switch(user.authority){
-                case 'Creator':
-                    Logger.info("Creator Logged in");
-                return 3;
-                case 'Manager':
-                    Logger.info("Manager Logged in");
-                return 2;
-                case 'User':
-                    Logger.info("User Logged in");
-                return 1;
-            }
+            return user.is_creator ? CREATOR : USER;
         }
         catch(error){
             Logger.warning("Not logged in");
             Logger.warning(error);
-            return -1;
+            return NOT_AUTHORIZED;
         }
     }
 
@@ -68,24 +63,24 @@ class UserController {
         // check if first boot then allow add user as creator
         // can only add user from creator/manager/first boot
         const status = await this.status(ctx);
-        if(status === -1 || status === 1){
+        if(status === NOT_AUTHORIZED || status === USER){
             Logger.warning("Cannot add user");
             return response.internalServerError('Cannot add user');
         }
 
-        const {password, username, authority} = request.post();
+        const {password, username} = request.post();
         
         try{
-            Logger.info(`username: ${username}, password: ${password}, authority: ${authority}`);
+            Logger.info(`username: ${username}, password: ${password}`);
             Logger.info('create new user');
 
             const user = new User();
             user.username = username;
             user.password = password;
-            user.authority = authority;
+            user.is_creator = status === FIRST_BOOT;
             await user.save();
 
-            return response.ok({msg: 'succeed create new user', status: status});
+            return response.ok('succeed create new user');
         }
         catch(error){
             Logger.warning('Fail to create new user');
@@ -98,15 +93,7 @@ class UserController {
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
-    async delete({response, params, auth}){
-        // check logged as creator or manager
-        // can only delete user from creator/manager
-        const status = await this.status(auth);
-        if(status === -1 || status === 1 || status === 0){
-            Logger.warning("Cannot delete user");
-            return response.internalServerError('Cannot delete user');
-        }
-
+    async delete({response, params}){
         const id = params.id;
         
         try{

@@ -16,8 +16,7 @@ class AuthCreator {
   	async handle ({ auth, response }, next) {
 		try{
 			const user = await auth.getUser();
-			Logger.info(user.authority);
-			if(user.authority !== 'Creator') throw '';
+			if(!user.is_creator) throw '';
 		}
 		catch(error){
 			Logger.warning('Need creator authorization to proceed');
