@@ -80,3 +80,5 @@ Route.group(function(){
 Route.group(function(){
 
 }).prefix('api');
+
+Route.any('#/*', ()=>{});
