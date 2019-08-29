@@ -85,18 +85,20 @@ class StorageController {
             await request.multipart.process();
 
             // put file into destination path
-            let{path} = body;
-            let files = [];
+            let {path} = body;
+            let filesData = [];
+            Logger.info(`files ${files.length}`);
             for(const file of files){   
                 const to = path 
                     ? `${id}/${file.clientName}` 
                     : `${id}/${path}/${file.clientName}`;
-
+                
+                Logger.info(`Put file to ${to}`);
                 await Drive.put(to, file.stream);
                 
                 const stat = await fs.lstat(Helpers.tmpPath(`storage/${to}`));
-                files.push({
-                    name: stat.name,
+                filesData.push({
+                    name: file.clientName,
                     size: stat.size,
                     created: stat.ctime,
                     modified: stat.mtime
@@ -113,7 +115,7 @@ class StorageController {
                 topic.broadcast('upload', {
                     _id: id,
                     path: path,
-                    files: files
+                    files: filesData
                 });
             }
         }
