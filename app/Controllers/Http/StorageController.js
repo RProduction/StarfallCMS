@@ -305,6 +305,27 @@ class StorageController {
             return response.internalServerError(`Fail to delete files and folders`);
         }
     }
+
+    /**
+    * @param {object} ctx
+    * @param {import('@adonisjs/framework/src/Request')} ctx.request
+    * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    */
+    // stream file
+    // receive path query
+    async stream({request, response, params}){
+        const project = params.project;
+        const {path} = request.get();
+
+        try{
+            Logger.info(`stream file in project ${project} with path ${path}`);
+        }
+        catch(error){
+            Logger.warning('Fail to stream file');
+            Logger.warning(error);
+            return response.internalServerError('Fail to stream file');
+        }
+    }
 }
 
 module.exports = StorageController

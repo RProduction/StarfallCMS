@@ -9,7 +9,6 @@ const Env = use('Env');
 class Project extends Model {
     static boot(){
         super.boot();
-        this.addHook('beforeCreate', 'ProjectHook.beforeCreate');
         this.addHook('beforeDelete', 'ProjectHook.beforeDelete');
     }
 
@@ -27,6 +26,10 @@ class Project extends Model {
 
     entities(){
         return this.hasMany('App/Models/Entity', '_id', 'project_id');
+    }
+
+    tokens () {
+        return this.hasMany('App/Models/Token', '_id', 'user_id')
     }
 }
 

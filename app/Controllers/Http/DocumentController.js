@@ -7,8 +7,6 @@ const Document = use('App/Models/Document');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
-const Helpers = use('Helpers');
-
 /** @type {import('@adonisjs/websocket/src/Ws')} */
 const Ws = use('Ws');
 /** @type {import('@adonisjs/websocket/src/Channel')} */
@@ -23,7 +21,9 @@ class DocumentController {
     */
     // get all document data in table
     // need parameter entity id as collection name
-    // can only be called from StarfallCMS only(must be login)
+    // can only be called from StarfallCMS and api authenticated
+    // have get query consisting of limit, sort, search
+    // will always return array
     async index({response, params}){
         const id = params.id;
         try{
@@ -51,7 +51,7 @@ class DocumentController {
 
         try{
             Logger.info(`add new document into entity ${id}`);
-
+            
             // find entity first
             const entity = await Entity.findOrFail(id);
 
@@ -155,6 +155,24 @@ class DocumentController {
             Logger.warning(error);
             return response.internalServerError('Fail to delete documents');
         }
+    }
+
+    /**
+    * @param {object} ctx
+    */
+    // this will be called as connector between api route and normal route
+    publicGet(ctx){
+        ctx.params.id = ctx.params.entity;
+        this.index(ctx);
+    }
+
+    /**
+    * @param {object} ctx
+    */
+    // this will be called as connector between api route and normal route
+    publicAdd(ctx){
+        ctx.params.id = ctx.params.entity;
+        this.add(ctx);
     }
 }
 

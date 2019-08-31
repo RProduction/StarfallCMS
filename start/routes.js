@@ -75,9 +75,20 @@ Route.group(function(){
 }).prefix('storage').middleware('auth');
 
 // routes group for public access
-// need KEY API
+// need to attempt sign in using project name as uid and public key as password
 Route.group(function(){
+    // storage
+    // use for download or file streaming
+    Route.get('', 'DocumentController.stream');
 
-}).prefix('api');
+}).prefix('api/storage/:project').middleware(['auth:api', 'authApi']);
+
+Route.group(function(){
+    // documents
+    Route.get(':entity', 'DocumentController.publicGet');
+    Route.post(':entity', 'DocumentController.publicAdd');
+    Route.post(':id/modify', 'DocumentController.modify');
+    Route.delete('', 'DocumentController.delete');
+}).prefix('api/document/:project').middleware(['auth:api', 'authApi']);
 
 Route.any('#/*', ()=>{});

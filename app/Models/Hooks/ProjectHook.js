@@ -18,11 +18,6 @@ const Helpers = use('Helpers');
 const ProjectHook = exports = module.exports = {}
 
 /** @param {Model} modelInstance*/
-ProjectHook.beforeCreate = async (modelInstance) => {
-    modelInstance.public_key = crypto.randomBytes(30).toString('hex');
-}
-
-/** @param {Model} modelInstance*/
 // hook for delete all entity inside project when project is deleted
 ProjectHook.beforeDelete = async (modelInstance) => {
     let entities = await modelInstance.entities().fetch();
