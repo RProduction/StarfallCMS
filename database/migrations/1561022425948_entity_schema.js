@@ -3,10 +3,6 @@
 /** @type {import('lucid-mongo/src/Migration')} */
 const Schema = use('Schema')
 
-// entity have schema field with object type
-// schema consist of field: string, integer, float, boolean, file, object, array
-// object = {}
-// array = ['type']
 class EntitySchema extends Schema {
   up () {
     this.create('entities', (collection) => {
