@@ -29,10 +29,11 @@ class ProjectController {
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // add new project
     // only creator can add new project
-    async add({request, response}){
+    async add({request, response, auth}){
         const {name} = request.post();
 
         try{
@@ -40,6 +41,11 @@ class ProjectController {
             
             const project = new Project();
             project.name = name;
+            await project.save();
+
+            // make the token
+            const res = await auth.authenticator('api').generate(project);
+            project.public_key = res.token;
             await project.save();
 
             Logger.info(`${name}: ${project.public_key}`);
@@ -91,10 +97,11 @@ class ProjectController {
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // rename existing project
     // only creator can rename existing project
-    async rename({request, response, params}){
+    async rename({request, response, params, auth}){
         const id = params.id;
         const {name} = request.post();
 
@@ -102,7 +109,13 @@ class ProjectController {
             Logger.info(`rename project with id ${id} into ${name}`);
             
             const project = await Project.findOrFail(id);
+            
+            // change token
+            await auth.authenticator('api').revokeTokensForUser(project);
+            const res = await auth.authenticator('api').generate(project);
+
             project.name = name;
+            project.public_key = res.token;
             await project.save();
 
             response.ok('succeed rename project');
@@ -112,7 +125,8 @@ class ProjectController {
                 topic.broadcast('rename', {
                     _id: project._id,
                     name: project.name,
-                    updated_at: project.updated_at
+                    updated_at: project.updated_at,
+                    public_key: project.public_key
                 });
             }
         }

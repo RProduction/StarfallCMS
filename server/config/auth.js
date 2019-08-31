@@ -86,9 +86,9 @@ module.exports = {
   */
   api: {
     serializer: 'LucidMongo',
-    model: 'App/Models/User',
+    model: 'App/Models/Project',
     scheme: 'api',
-    uid: 'username',
-    password: 'password'
+    uid: '_id',
+    password: '_id'
   }
 }
