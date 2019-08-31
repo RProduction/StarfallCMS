@@ -53,7 +53,6 @@ Route.group(function(){
     Route.post(':id', 'EntityController.add').validator('entity');
     Route.delete(':id', 'EntityController.delete');
     Route.post(':id/rename', 'EntityController.rename').validator('entity');
-    Route.post(':id/schema', 'EntityController.schema');
 }).prefix('entity').middleware(['auth']);
 
 // routes group with all auth

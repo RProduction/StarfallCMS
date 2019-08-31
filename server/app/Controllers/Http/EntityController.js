@@ -36,7 +36,6 @@ class EntityController {
             // insert
             const entity = new Entity();
             entity.name = name;
-            entity.schema = {};
             await project.entities().save(entity);
 
             response.ok('succeed create new entity');
@@ -128,42 +127,6 @@ class EntityController {
             Logger.warning('Fail to rename entity');
             Logger.warning(error);
             return response.internalServerError('Fail to rename entity');
-        }
-    }
-
-    /**
-    * @param {object} ctx
-    * @param {import('@adonisjs/framework/src/Request')} ctx.request
-    * @param {import('@adonisjs/framework/src/Response')} ctx.response
-    */
-    // set schema for entity with id
-    async schema({response, request, params}){
-        const id = params.id;
-        const {schema} = request.post();
-
-        try{
-            Logger.info(`set entity schema ${id}`);
-        
-            // set
-            const entity = await Entity.findOrFail(id);
-            entity.schema = schema;
-            await entity.save();
-
-            response.ok('succeed set entity schema');
-
-            const topic = channel.topic('entity');
-            if(topic){
-                topic.broadcast('schema', {
-                    _id: entity._id,
-                    schema: entity.schema,
-                    updated_at: entity.updated_at
-                });
-            }    
-        }
-        catch(error){
-            Logger.warning('Fail to set entity schema');
-            Logger.warning(error);
-            return response.internalServerError('Fail to set entity schema');
         }
     }
 }
