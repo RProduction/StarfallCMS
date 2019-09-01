@@ -8,7 +8,6 @@ class ProjectSchema extends Schema {
     this.create('projects', (collection) => {
       collection.increments();
       collection.index('name', {name: 1}, {unique: true});
-      collection.index('public_key', {name: 1}, {unique: true});
       collection.string('img_type');
       collection.timestamps();
     })

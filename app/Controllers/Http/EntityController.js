@@ -44,7 +44,7 @@ class EntityController {
             if(topic){
                 topic.broadcast('add', {
                     project_id: project.id,
-                    ...entity.toJSON()
+                    ...entity.toObject()
                 });
             }    
         }

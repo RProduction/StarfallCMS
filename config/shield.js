@@ -1,5 +1,8 @@
 'use strict'
 
+/** @type {import('@adonisjs/framework/src/Env')} */
+const Env = use('Env')
+
 module.exports = {
   /*
   |--------------------------------------------------------------------------
@@ -132,12 +135,12 @@ module.exports = {
   |
   */
   csrf: {
-    enable: false,
-    methods: ['POST', 'PUT', 'DELETE'],
-    filterUris: [],
+    enable: Env.get('NODE_ENV') !== "development",
+    methods: ['POST', 'GET', 'DELETE'],
+    filterUris: ['/api/*'],
     cookieOptions: {
       httpOnly: false,
-      sameSite: true,
+      sameSite: false,
       path: '/',
       maxAge: 7200
     }
