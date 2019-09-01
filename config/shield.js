@@ -139,8 +139,8 @@ module.exports = {
     methods: ['POST', 'GET', 'DELETE'],
     filterUris: ['/api/*'],
     cookieOptions: {
-      httpOnly: false,
-      sameSite: false,
+      httpOnly: Env.get('NODE_ENV') !== "development",
+      sameSite: Env.get('NODE_ENV') !== "development",
       path: '/',
       maxAge: 7200
     }

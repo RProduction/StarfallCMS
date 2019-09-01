@@ -26,7 +26,7 @@ module.exports = {
   | are signed and encrypted.
   |
   */
-  cookieName: 'adonis-session',
+  cookieName: 'Starfall CMS session',
 
   /*
   |--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ module.exports = {
   */
   cookie: {
     httpOnly: true,
-    sameSite: false,
+    sameSite: Env.get('NODE_ENV') !== "development",
     path: '/'
   },
 
