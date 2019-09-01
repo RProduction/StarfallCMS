@@ -1,8 +1,5 @@
 'use strict'
 
-/** @type {import('@adonisjs/framework/src/Env')} */
-const Env = use('Env')
-
 module.exports = {
   /*
   |--------------------------------------------------------------------------
@@ -37,47 +34,6 @@ module.exports = {
 
   /*
   |--------------------------------------------------------------------------
-  | Basic Auth
-  |--------------------------------------------------------------------------
-  |
-  | The basic auth authenticator uses basic auth header to authenticate a
-  | user.
-  |
-  | NOTE:
-  | This scheme is not persistent and users are supposed to pass
-  | login credentials on each request.
-  |
-  */
-  basic: {
-    serializer: 'LucidMongo',
-    model: 'App/Models/User',
-    scheme: 'basic',
-    uid: 'username',
-    password: 'password'
-  },
-
-  /*
-  |--------------------------------------------------------------------------
-  | Jwt
-  |--------------------------------------------------------------------------
-  |
-  | The jwt authenticator works by passing a jwt token on each HTTP request
-  | via HTTP `Authorization` header.
-  |
-  */
-  jwt: {
-    serializer: 'LucidMongo',
-    model: 'App/Models/User',
-    scheme: 'jwt',
-    uid: 'username',
-    password: 'password',
-    options: {
-      secret: Env.get('APP_KEY')
-    }
-  },
-
-  /*
-  |--------------------------------------------------------------------------
   | Api
   |--------------------------------------------------------------------------
   |
@@ -86,9 +42,11 @@ module.exports = {
   */
   api: {
     serializer: 'LucidMongo',
-    model: 'App/Models/Project',
+    model: 'App/Models/Token',
     scheme: 'api',
-    uid: '_id',
-    password: '_id'
+    model: 'App/Models/Project',
+    token: 'App/Models/Token',
+    uid: 'name',
+    password: ''
   }
 }

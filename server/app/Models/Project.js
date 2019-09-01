@@ -29,7 +29,7 @@ class Project extends Model {
     }
 
     tokens () {
-        return this.hasMany('App/Models/Token', '_id', 'user_id')
+        return this.hasMany('App/Models/Token', '_id', 'user_id');
     }
 }
 

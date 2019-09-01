@@ -22,7 +22,11 @@ class ProjectController {
     // and embed entities inside each project
     // can only be called from StarfallCMS only(must be login)
     async index({response}){
-        return response.json(await Project.with('entities').fetch());
+        return response.json(
+            await Project.with('entities').with('tokens', (builder)=>{
+                builder.select(['user_id', 'token']).where('is_revoked', false);
+            }).fetch()
+        );
     }
 
     /**
@@ -45,15 +49,16 @@ class ProjectController {
 
             // make the token
             const res = await auth.authenticator('api').generate(project);
-            project.public_key = res.token;
-            await project.save();
 
-            Logger.info(`${name}: ${project.public_key}`);
+            Logger.info(`${name}: ${res.token}`);
             response.ok('succeed create new project');
             
             const topic = channel.topic('project');
             if(topic){
-                topic.broadcast('add', project);
+                topic.broadcast('add', {
+                    ...project.toObject(), 
+                    public_key: res.token
+                });
             }
         }
         catch(error){
@@ -66,16 +71,22 @@ class ProjectController {
     /**
     * @param {object} ctx
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
+    * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // delete existing project
     // only creator can delete existing project
-    async delete({response, params}){
+    async delete({response, params, auth}){
         const id = params.id;
 
         try{
             Logger.info(`delete project with id ${id}`);
             
             const project = await Project.findOrFail(id);
+
+            // revoke tokens before deleting project
+            await auth.authenticator('api').revokeTokensForUser(project, null, true);
+
+            // delete project
             await project.delete();
             response.ok('succeed deleting project');
 
@@ -110,13 +121,12 @@ class ProjectController {
             
             const project = await Project.findOrFail(id);
             
-            // change token
+            project.name = name;
+            await project.save();
+
+            // revoke tokens
             await auth.authenticator('api').revokeTokensForUser(project);
             const res = await auth.authenticator('api').generate(project);
-
-            project.name = name;
-            project.public_key = res.token;
-            await project.save();
 
             response.ok('succeed rename project');
 
@@ -126,7 +136,7 @@ class ProjectController {
                     _id: project._id,
                     name: project.name,
                     updated_at: project.updated_at,
-                    public_key: project.public_key
+                    public_key: res.public_key
                 });
             }
         }

@@ -161,18 +161,18 @@ class DocumentController {
     * @param {object} ctx
     */
     // this will be called as connector between api route and normal route
-    publicGet(ctx){
+    async publicGet(ctx){
         ctx.params.id = ctx.params.entity;
-        this.index(ctx);
+        return await this.index(ctx);
     }
 
     /**
     * @param {object} ctx
     */
     // this will be called as connector between api route and normal route
-    publicAdd(ctx){
+    async publicAdd(ctx){
         ctx.params.id = ctx.params.entity;
-        this.add(ctx);
+        return await this.add(ctx);
     }
 }
 

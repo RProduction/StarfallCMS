@@ -3,7 +3,6 @@
 /** @typedef {typeof import('lucid-mongo/src/LucidMongo/Model')} ModelType*/
 
 const fs = require('fs-extra');
-const crypto = require('crypto');
 
 /** @type {ModelType} */
 const Entity = use('App/Models/Entity');
