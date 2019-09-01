@@ -1,6 +1,6 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model');
 
 /** @type {import('@adonisjs/framework/src/Env')} */
@@ -20,16 +20,16 @@ class Project extends Model {
         return ['img_url'];
     }
 
-    getImgUrl ({ _id, img_type }) {
-        return `${Env.get('APP_URL')}/img/${_id}.${img_type}`;
+    getImgUrl ({ id, img_type }) {
+        return `${Env.get('APP_URL')}/img/${id}.${img_type}`;
     }
 
     entities(){
-        return this.hasMany('App/Models/Entity', '_id', 'project_id');
+        return this.hasMany('App/Models/Entity');
     }
 
     tokens () {
-        return this.hasMany('App/Models/Token', '_id', 'user_id');
+        return this.hasMany('App/Models/Token', 'id', 'user_id');
     }
 }
 

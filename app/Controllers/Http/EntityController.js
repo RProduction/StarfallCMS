@@ -1,8 +1,8 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Entity = use('App/Models/Entity');
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
@@ -30,8 +30,8 @@ class EntityController {
 
             // check existing entity inside project
             const project = await Project.findOrFail(id);
-            let count = await project.entities().where('name', name).count();
-            if(count) throw('Entity already exist inside project');
+            let count = await project.entities().where('name', name).getCount();
+            if(count > 0) throw('Entity already exist inside project');
             
             // insert
             const entity = new Entity();
@@ -76,7 +76,7 @@ class EntityController {
             const topic = channel.topic('entity');
             if(topic){
                 topic.broadcast('delete', {
-                    _id: entity._id
+                    id: entity.id
                 });
             }    
         }
@@ -105,8 +105,8 @@ class EntityController {
 
             // check if entity exist with new name
             const project = await Project.findOrFail(entity.project_id);
-            let count = await project.entities().where('name', name).count();
-            if(count) throw('Entity already exist inside project');
+            let count = await project.entities().where('name', name).getCount();
+            if(count > 0) throw('Entity already exist inside project');
 
             // rename
             entity.name = name;
@@ -117,7 +117,7 @@ class EntityController {
             const topic = channel.topic('entity');
             if(topic){
                 topic.broadcast('rename', {
-                    _id: entity._id,
+                    id: entity.id,
                     name: entity.name,
                     updated_at: entity.updated_at
                 });

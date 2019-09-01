@@ -1,6 +1,6 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
 class Entity extends Model {
@@ -10,11 +10,11 @@ class Entity extends Model {
     }
 
     project(){
-        return this.belongsTo('App/Models/Project', 'project_id', '_id');
+        return this.belongsTo('App/Models/Project');
     }
 
     documents(){
-        return this.hasMany('App/Models/Document', '_id', 'entity_id');
+        return this.hasMany('App/Models/Document');
     }
 }
 

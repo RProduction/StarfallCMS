@@ -1,6 +1,6 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const User = use('App/Models/User');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
@@ -36,9 +36,9 @@ class UserController {
     // if not first boot and creator login then 3
     async status({auth}){
         try{
-            const usercount = await User.count();
+            const usercount = await User.getCount();
             Logger.info(`User count ${usercount}`);
-            if(!usercount){
+            if(usercount === 0){
                 Logger.info("First boot");
                 return FIRST_BOOT;
             }

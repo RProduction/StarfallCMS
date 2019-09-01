@@ -25,7 +25,7 @@ module.exports = {
   |
   */
   session: {
-    serializer: 'LucidMongo',
+    serializer: 'lucid',
     model: 'App/Models/User',
     scheme: 'session',
     uid: 'username',
@@ -41,12 +41,11 @@ module.exports = {
   |
   */
   api: {
-    serializer: 'LucidMongo',
-    model: 'App/Models/Token',
-    scheme: 'api',
+    serializer: 'lucid',
     model: 'App/Models/Project',
     token: 'App/Models/Token',
-    uid: 'name',
+    scheme: 'api',
+    uid: 'username',
     password: ''
   }
 }

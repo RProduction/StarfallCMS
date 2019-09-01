@@ -20,7 +20,7 @@ class AuthApi {
 		try {
 			project = await auth.authenticator('api').getUser();
 			if (project.name !== params.project) throw '';
-			params.project = project._id;
+			params.project = project.id;
 		}
 		catch (error) {
 			Logger.warning('Need right project name to proceed');
@@ -37,7 +37,7 @@ class AuthApi {
 				entity = entity.toJSON();
 				if(entity.length === 0) throw '';
 
-				params.entity = entity[0]._id;
+				params.entity = entity[0].id;
 			}
 		}
 		catch(error){

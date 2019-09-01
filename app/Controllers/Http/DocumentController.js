@@ -1,8 +1,8 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Entity = use('App/Models/Entity');
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Document = use('App/Models/Document');
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
@@ -61,7 +61,7 @@ class DocumentController {
             await entity.documents().save(document);
 
             // return document id
-            response.ok({msg: 'succeed adding new document', id: document._id});
+            response.ok({msg: 'succeed adding new document', id: document.id});
             
             const topic = channel.topic('document');
             if(topic){
@@ -101,7 +101,7 @@ class DocumentController {
             const topic = channel.topic('document');
             if(topic){
                 topic.broadcast('modify', {
-                    _id: document._id, 
+                    id: document.id, 
                     data: document.data,
                     updated_at: document.updated_at
                 });
@@ -133,12 +133,12 @@ class DocumentController {
             entity = await Entity.find(entity.entity_id);
 
             Logger.info(`delete documents`);
-            await Document.query().whereIn('_id', ids).delete();
+            await Document.query().whereIn('id', ids).delete();
 
             // loop ids
             // delete folder project/entity/document if exist
             for(const id of ids){
-                const path = `${entity.project_id}/${entity._id}/${id}`;
+                const path = `${entity.project_id}/${entity.id}/${id}`;
                 if(await Drive.exists(path))
                     await Drive.delete(path);
             }

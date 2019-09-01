@@ -1,6 +1,6 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
@@ -22,11 +22,9 @@ class ProjectController {
     // and embed entities inside each project
     // can only be called from StarfallCMS only(must be login)
     async index({response}){
-        return response.json(
-            await Project.with('entities').with('tokens', (builder)=>{
-                builder.select(['user_id', 'token']).where('is_revoked', false);
-            }).fetch()
-        );
+        let data = await Project.query().with('entities').fetch();
+
+        return response.json(data);
     }
 
     /**
@@ -49,16 +47,15 @@ class ProjectController {
 
             // make the token
             const res = await auth.authenticator('api').generate(project);
+            project.public_key = res.token;
+            await project.save();
 
             Logger.info(`${name}: ${res.token}`);
             response.ok('succeed create new project');
             
             const topic = channel.topic('project');
             if(topic){
-                topic.broadcast('add', {
-                    ...project.toObject(), 
-                    public_key: res.token
-                });
+                topic.broadcast('add', project);
             }
         }
         catch(error){
@@ -93,7 +90,7 @@ class ProjectController {
             const topic = channel.topic('project');
             if(topic){
                 topic.broadcast('delete', {
-                    _id: project._id
+                    id: project.id
                 });
             }
         }
@@ -121,22 +118,23 @@ class ProjectController {
             
             const project = await Project.findOrFail(id);
             
-            project.name = name;
-            await project.save();
-
             // revoke tokens
-            await auth.authenticator('api').revokeTokensForUser(project);
+            await auth.authenticator('api').revokeTokensForUser(project, null, true);
             const res = await auth.authenticator('api').generate(project);
+
+            project.name = name;
+            project.public_key = res.token;
+            await project.save();
 
             response.ok('succeed rename project');
 
             const topic = channel.topic('project');
             if(topic){
                 topic.broadcast('rename', {
-                    _id: project._id,
+                    id: project.id,
                     name: project.name,
                     updated_at: project.updated_at,
-                    public_key: res.public_key
+                    public_key: project.public_key
                 });
             }
         }
@@ -168,7 +166,7 @@ class ProjectController {
 
             // process image
             await img.move(Helpers.publicPath('img'), {
-                name: `${project._id}.${img.subtype}`,
+                name: `${project.id}.${img.subtype}`,
                 overwrite: true
             });
 
@@ -184,7 +182,7 @@ class ProjectController {
             const topic = channel.topic('project');
             if(topic){
                 topic.broadcast('img', {
-                    _id: project._id,
+                    id: project.id,
                     img_url: project.img_url,
                     updated_at: project.updated_at
                 });

@@ -2,7 +2,7 @@
 
 const fs = require('fs-extra');
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Project = use('App/Models/Project');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
@@ -113,7 +113,7 @@ class StorageController {
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('upload', {
-                    _id: id,
+                    id: id,
                     path: path,
                     files: filesData
                 });
@@ -158,7 +158,7 @@ class StorageController {
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('folder', {
-                    _id: id,
+                    id: id,
                     path: path
                 });
             }
@@ -210,7 +210,7 @@ class StorageController {
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('move', {
-                    _id: id,
+                    id: id,
                     path: path,
                     targets: moved
                 });
@@ -254,7 +254,7 @@ class StorageController {
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('rename', {
-                    _id: id,
+                    id: id,
                     path: path,
                     name: name,
                     new_name: new_name
@@ -294,7 +294,7 @@ class StorageController {
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('delete', {
-                    _id: id,
+                    id: id,
                     paths: paths
                 });
             }
