@@ -21,7 +21,7 @@ const providers = [
   '@adonisjs/drive/providers/DriveProvider',
   '@adonisjs/websocket/providers/WsProvider',
   '@adonisjs/validator/providers/ValidatorProvider',
-  'lucid-mongo/providers/LucidMongoProvider',
+  '@adonisjs/lucid/providers/LucidProvider'
 ]
 
 /*
@@ -34,7 +34,7 @@ const providers = [
 |
 */
 const aceProviders = [
-  'lucid-mongo/providers/MigrationsProvider'
+  '@adonisjs/lucid/providers/MigrationsProvider'
 ]
 
 /*

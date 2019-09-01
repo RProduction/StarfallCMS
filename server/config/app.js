@@ -16,7 +16,7 @@ module.exports = {
   |
   */
 
-  name: Env.get('APP_NAME', 'AdonisJs'),
+  name: Env.get('APP_NAME', 'Starfall CMS'),
 
   /*
   |--------------------------------------------------------------------------
@@ -201,7 +201,7 @@ module.exports = {
     */
     console: {
       driver: 'console',
-      name: 'adonis-app',
+      name: 'Starfall CMS',
       level: 'info'
     },
 
@@ -218,7 +218,7 @@ module.exports = {
     */
     file: {
       driver: 'file',
-      name: 'adonis-app',
+      name: 'Starfall CMS',
       filename: 'adonis.log',
       level: 'info'
     }

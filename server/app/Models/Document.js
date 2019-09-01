@@ -1,11 +1,19 @@
 'use strict'
 
-/** @type {typeof import('lucid-mongo/src/LucidMongo/Model')} */
+/** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
 class Document extends Model {
-    entities(){
-        return this.belongsTo('App/Models/Entity', 'entity_id', '_id');
+    getData(data){
+        return JSON.parse(data);
+    }
+
+    setData(data){
+        return JSON.stringify(data);
+    }
+
+    entity(){
+        return this.belongsTo('App/Models/Entity');
     }
 }
 

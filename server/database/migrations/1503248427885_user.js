@@ -1,16 +1,16 @@
 'use strict'
 
-/** @type {import('lucid-mongo/src/Migration')} */
+/** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
 class UserSchema extends Schema {
   up () {
-    this.create('users', (collection) => {
-      collection.increments();
-      collection.index('username', {username: 1}, {unique: true});
-      collection.string('password', 60);
-      collection.boolean('is_creator');
-      collection.timestamps();
+    this.create('users', (table) => {
+      table.bigIncrements();
+      table.string('username', 80).notNullable().unique();
+      table.string('password', 60).notNullable();
+      table.boolean('is_creator').notNullable().defaultTo(false);
+      table.timestamps();
     })
   }
 
