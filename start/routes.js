@@ -32,7 +32,7 @@ Route.group(function(){
     // routes for User Authentication
     Route.get('status', 'UserController.status');
     Route.post('', 'UserController.add').validator('signup');
-    Route.delete(':id', 'UserController.delete').middleware(['auth', 'authCreator']);
+    Route.delete(':user', 'UserController.delete').middleware(['auth', 'authCreator']);
     Route.post('signin', 'UserController.signin').validator('signin');
     Route.post('signout', 'UserController.signout');
 }).prefix('user');
@@ -41,53 +41,53 @@ Route.group(function(){
 // routes for Projects
 Route.group(function(){
     Route.post('', 'ProjectController.add').validator('project');
-    Route.delete(':id', 'ProjectController.delete');
-    Route.post(':id/rename', 'ProjectController.rename').validator('project');
-    Route.post(':id/img', 'ProjectController.img').validator('projectImg');
+    Route.delete(':project', 'ProjectController.delete');
+    Route.post(':project/rename', 'ProjectController.rename').validator('project');
+    Route.post(':project/img', 'ProjectController.img').validator('projectImg');
 
 }).prefix('project').middleware(['auth', 'authCreator']);
 
 // routes group with creator and manager only auth
 // routes for Entity
 Route.group(function(){
-    Route.post(':id', 'EntityController.add').validator('entity');
-    Route.delete(':id', 'EntityController.delete');
-    Route.post(':id/rename', 'EntityController.rename').validator('entity');
+    Route.post(':project', 'EntityController.add').validator('entity');
+    Route.delete(':entity', 'EntityController.delete');
+    Route.post(':entity/rename', 'EntityController.rename').validator('entity');
 }).prefix('entity').middleware(['auth']);
 
 // routes group with all auth
 // routes for Document
 Route.group(function(){
-    Route.get(':id', 'DocumentController.index');
-    Route.post(':id', 'DocumentController.add');
-    Route.post(':id/modify', 'DocumentController.modify');
+    Route.get(':entity', 'DocumentController.index');
+    Route.post(':entity', 'DocumentController.add');
+    Route.post(':document/modify', 'DocumentController.modify');
     Route.delete('', 'DocumentController.delete');
 }).prefix('document').middleware('auth');
 
 // routes for Storage
 Route.group(function(){
-    Route.get(':id', 'StorageController.index');
-    Route.post(':id', 'StorageController.upload');
-    Route.post(':id/folder', 'StorageController.folder');
-    Route.post(':id/move', 'StorageController.move');
-    Route.post(':id/rename', 'StorageController.rename');
-    Route.delete(':id', 'StorageController.delete');
-}).prefix('storage').middleware('auth');
+    Route.get('', 'StorageController.index');
+    Route.post('', 'StorageController.upload');
+    Route.post(':folder', 'StorageController.folder');
+    Route.post('move', 'StorageController.move');
+    Route.post('rename', 'StorageController.rename');
+    Route.delete('', 'StorageController.delete');
+}).prefix('storage/:project').middleware('auth');
 
 // routes group for public access
 // need to attempt sign in using project name as uid and public key as password
 Route.group(function(){
     // storage
     // use for download or file streaming
-    Route.get('', 'DocumentController.stream');
+    Route.get('', 'StorageController.stream');
 
 }).prefix('api/storage/:project').middleware(['auth:api', 'authApi']);
 
 Route.group(function(){
     // documents
-    Route.get(':entity', 'DocumentController.publicGet');
-    Route.post(':entity', 'DocumentController.publicAdd');
-    Route.post(':id/modify', 'DocumentController.modify');
+    Route.get(':entity', 'DocumentController.index');
+    Route.post(':entity', 'DocumentController.add');
+    Route.post(':document/modify', 'DocumentController.modify');
     Route.delete('', 'DocumentController.delete');
 }).prefix('api/document/:project').middleware(['auth:api', 'authApi']);
 

@@ -22,14 +22,13 @@ class EntityController {
     // add new entity
     // only creator and manager can add new entity
     async add({request, response, params}){
-        const id = params.id;
         const {name} = request.post();
 
         try{
             Logger.info(`create new entity ${name}`);
 
             // check existing entity inside project
-            const project = await Project.findOrFail(id);
+            const project = await Project.findOrFail(params.project);
             let count = await project.entities().where('name', name).getCount();
             if(count > 0) throw('Entity already exist inside project');
             
@@ -62,13 +61,11 @@ class EntityController {
     // delete existing entity
     // only creator and manager can delete existing entity
     async delete({response, params}){
-        const id = params.id;
-
         try{
-            Logger.info(`delete entity with id ${id}`);
+            Logger.info(`delete entity with id ${params.entity}`);
             
             // find and delete entity model
-            const entity = await Entity.findOrFail(id);
+            const entity = await Entity.findOrFail(params.entity);
 
             await entity.delete();
             response.ok('succeed deleting entity');
@@ -95,13 +92,12 @@ class EntityController {
     // rename existing entity
     // only creator and manager can rename existing entity
     async rename({request, response, params}){
-        const id = params.id;
         const {name} = request.post();
 
         try{
-            Logger.info(`rename entity with id ${id} into ${name}`);
+            Logger.info(`rename entity with id ${params.entity} into ${name}`);
             
-            const entity = await Entity.findOrFail(id);
+            const entity = await Entity.findOrFail(params.entity);
 
             // check if entity exist with new name
             const project = await Project.findOrFail(entity.project_id);

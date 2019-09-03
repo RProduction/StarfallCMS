@@ -44,21 +44,19 @@ class StorageController {
     */
     // return list of all files and folders in Storage
     // data: name, size in byte, isFolder, last modified
-    // receive: id(project id)
+    // receive: project(id)
     async index({response, params}){
-        const id = params.id;
-
         try{
-            Logger.info(`fetch storage in project with id ${id}`);
-            await Project.findOrFail(id);
+            Logger.info(`fetch storage in project with id ${params.project}`);
+            await Project.findOrFail(params.project);
         
             let result = {};
-            await ProcessStorage(Helpers.tmpPath(`storage/${id}`), result);
+            await ProcessStorage(Helpers.tmpPath(`storage/${params.project}`), result);
             
             return response.json(result);
         }catch(err){
-            Logger.warning(`fail to fetch storage in project with id ${id}`);
-            return response.notFound(`project with id ${id} not found`);
+            Logger.warning(`fail to fetch storage in project with id ${params.project}`);
+            return response.notFound(`project with id ${params.project} not found`);
         }
     }
 
@@ -68,12 +66,10 @@ class StorageController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // upload files into path
-    // receive: id(project id), path(destination path), file[]
+    // receive: project(id), path(destination path), file[]
     async upload({request, response, params}){
-        const id = params.id;
-
         try{
-            await Project.findOrFail(id);
+            await Project.findOrFail(params.project);
 
             Logger.info(`Preparing data to upload`);
 
@@ -90,8 +86,8 @@ class StorageController {
             Logger.info(`files ${files.length}`);
             for(const file of files){   
                 const to = path 
-                    ? `${id}/${file.clientName}` 
-                    : `${id}/${path}/${file.clientName}`;
+                    ? `${params.project}/${file.clientName}` 
+                    : `${params.project}/${path}/${file.clientName}`;
                 
                 Logger.info(`Put file to ${to}`);
                 await Drive.put(to, file.stream);
@@ -105,15 +101,15 @@ class StorageController {
                 });
             }
 
-            Logger.info(`upload files into path ${path} in project ${id}`);
+            Logger.info(`upload files into path ${path} in project ${params.project}`);
 
             // return list of uploaded file and path
-            response.ok(`succeed uploading file in project ${id}`);
+            response.ok(`succeed uploading file in project ${params.project}`);
             
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('upload', {
-                    id: id,
+                    id: params.project,
                     path: path,
                     files: filesData
                 });
@@ -132,17 +128,16 @@ class StorageController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // Add folder into path
-    // receive: id(project id), path(with folder name)
+    // receive: project(id), path(with folder name)
     async folder({request, response, params}){
-        const id = params.id;
         const {path} = request.post();
 
         try{
             // make folder
-            await Project.findOrFail(id);
+            await Project.findOrFail(params.project);
             
             Logger.info(`Add new folder`);
-            const to = `${id}/${path}`;
+            const to = `${params.project}/${path}`;
             if(await Drive.exists(to)) throw 'directory already exist';
             
             await fs.mkdir(
@@ -150,15 +145,15 @@ class StorageController {
                 {recursive: true}
             );
 
-            Logger.info(`Added folder with path ${path} in project ${id}`);
+            Logger.info(`Added folder with path ${path} in project ${params.project}`);
 
             // return folder path
-            response.ok(`succeed adding folder in project ${id}`);
+            response.ok(`succeed adding folder in project ${params.project}`);
             
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('folder', {
-                    id: id,
+                    id: params.project,
                     path: path
                 });
             }
@@ -176,23 +171,22 @@ class StorageController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // move files and folders into path
-    // receive: id(project id), from files and folders path(with name), to folder path
+    // receive: project(id), from files and folders path(with name), to folder path
     async move({request, response, params}){
-        const id = params.id;
         const {targets, path} = request.post();
 
         try{
             // move folders and files to path
-            await Project.findOrFail(id);
+            await Project.findOrFail(params.project);
 
-            Logger.info(`Move files and folders to path ${path} in project ${id}`);
+            Logger.info(`Move files and folders to path ${path} in project ${params.project}`);
             let moved = [];
             for(const target of targets){
-                const from = `${id}/${target}`;
+                const from = `${params.project}/${target}`;
 
                 const to = path 
-                    ? `${id}/${path}/${target.split('/').pop()}`
-                    : `${id}/${target.split('/').pop()}`;
+                    ? `${params.project}/${path}/${target.split('/').pop()}`
+                    : `${params.project}/${target.split('/').pop()}`;
 
                 if(!await Drive.exists(to) && await Drive.exists(from)){
                     Logger.info(`Move ${target} to ${to}`);
@@ -205,12 +199,12 @@ class StorageController {
             }
 
             // return folder path
-            response.ok(`succeed moving files and folders in project ${id}`);
+            response.ok(`succeed moving files and folders in project ${params.project}`);
             
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('move', {
-                    id: id,
+                    id: params.project,
                     path: path,
                     targets: moved
                 });
@@ -229,32 +223,31 @@ class StorageController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // rename file or folder
-    // receive: id(project id), path, name, new name
+    // receive: project(id), path, name, new name
     async rename({request, response, params}){
-        const id = params.id;
         const {name, new_name, path} = request.post();
         const _name = path ? `${path}/${name}` : name;
         const _new_name = path ? `${path}/${new_name}` : new_name ;
 
         try{
             // move folders and files to path
-            await Project.findOrFail(id);
+            await Project.findOrFail(params.project);
             
-            Logger.info(`Rename file or folder from ${name} to ${new_name} in project ${id}`);
-            if(!await Drive.exists(`${id}/${_name}`)) throw 'File or folder not exists!';
+            Logger.info(`Rename file or folder from ${name} to ${new_name} in project ${params.project}`);
+            if(!await Drive.exists(`${params.project}/${_name}`)) throw 'File or folder not exists!';
             
             await fs.rename(
-                Helpers.tmpPath(`storage/${id}/${_name}`), 
-                Helpers.tmpPath(`storage/${id}/${_new_name}`)
+                Helpers.tmpPath(`storage/${params.project}/${_name}`), 
+                Helpers.tmpPath(`storage/${params.project}/${_new_name}`)
             );
 
             // return folder path
-            response.ok(`succeed renaming file or folder in project ${id}`);
+            response.ok(`succeed renaming file or folder in project ${params.project}`);
             
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('rename', {
-                    id: id,
+                    id: params.project,
                     path: path,
                     name: name,
                     new_name: new_name
@@ -274,33 +267,32 @@ class StorageController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // delete files and folders
-    // receive: id(project id), deleted file or folder paths(with name)
+    // receive: project (id), deleted file or folder paths(with name)
     async delete({request, response, params}){
-        const id = params.id;
         const {paths} = request.post();
 
         try{
             // move folders and files to path
-            await Project.findOrFail(id);
+            await Project.findOrFail(params.project);
             
-            Logger.info(`Delete files and folders in project ${id}`);
+            Logger.info(`Delete files and folders in project ${params.project}`);
             for(const path of paths){
-                await Drive.delete(`${id}/${path}`);
+                await Drive.delete(`${params.project}/${path}`);
             }
 
             // return folder path
-            response.ok(`succeed deleting files and folders in project ${id}`);
+            response.ok(`succeed deleting files and folders in project ${params.project}`);
             
             const topic = channel.topic('storage');
             if(topic){
                 topic.broadcast('delete', {
-                    id: id,
+                    id: params.project,
                     paths: paths
                 });
             }
         }
         catch(error){
-            Logger.warning(`Fail to delete files and folders in project ${id}`);
+            Logger.warning(`Fail to delete files and folders in project ${params.project}`);
             Logger.warning(error);
             return response.internalServerError(`Fail to delete files and folders`);
         }
@@ -314,11 +306,18 @@ class StorageController {
     // stream file
     // receive path query
     async stream({request, response, params}){
-        const project = params.project;
         const {path} = request.get();
 
         try{
-            Logger.info(`stream file in project ${project} with path ${path}`);
+            Logger.info(`stream file in project ${params.project} with path ${path}`);
+
+            const targetPath = `${params.project}/${path}`;
+            const stat = await fs.lstat(Helpers.tmpPath(`storage/${targetPath}`));
+            if(stat.isDirectory()) throw 'Can only stream file';
+
+            const stream = Drive.getStream(targetPath);
+            response.implicitEnd = false;
+            stream.pipe(response.response);
         }
         catch(error){
             Logger.warning('Fail to stream file');
