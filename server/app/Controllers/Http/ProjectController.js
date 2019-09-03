@@ -73,12 +73,10 @@ class ProjectController {
     // delete existing project
     // only creator can delete existing project
     async delete({response, params, auth}){
-        const id = params.id;
-
         try{
-            Logger.info(`delete project with id ${id}`);
+            Logger.info(`delete project with id ${params.project}`);
             
-            const project = await Project.findOrFail(id);
+            const project = await Project.findOrFail(params.project);
 
             // revoke tokens before deleting project
             await auth.authenticator('api').revokeTokensForUser(project, null, true);
@@ -110,13 +108,12 @@ class ProjectController {
     // rename existing project
     // only creator can rename existing project
     async rename({request, response, params, auth}){
-        const id = params.id;
         const {name} = request.post();
 
         try{
-            Logger.info(`rename project with id ${id} into ${name}`);
+            Logger.info(`rename project with id ${params.project} into ${name}`);
             
-            const project = await Project.findOrFail(id);
+            const project = await Project.findOrFail(params.project);
             
             // revoke tokens
             await auth.authenticator('api').revokeTokensForUser(project, null, true);
@@ -153,16 +150,15 @@ class ProjectController {
     // change image for existing project
     // only creator can change image for existing project
     async img({request, response, params}){
-        const id = params.id;
         const img = request.file('img', {
             types: ['image'],
             size: '10mb'
         });
 
         try{
-            Logger.info(`change img for project with id ${id}`);
+            Logger.info(`change img for project with id ${params.project}`);
             
-            const project = await Project.findOrFail(id);
+            const project = await Project.findOrFail(params.project);
 
             // process image
             await img.move(Helpers.publicPath('img'), {

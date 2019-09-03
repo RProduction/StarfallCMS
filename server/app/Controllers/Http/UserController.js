@@ -94,11 +94,9 @@ class UserController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     async delete({response, params}){
-        const id = params.id;
-        
         try{
-            Logger.info(`delete user with id ${id}`);
-            const user = await User.findOrFail(id);
+            Logger.info(`delete user with id ${params.user}`);
+            const user = await User.findOrFail(params.user);
             await user.delete();
             return response.ok('delete user');
         }

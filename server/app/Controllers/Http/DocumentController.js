@@ -25,14 +25,13 @@ class DocumentController {
     // have get query consisting of limit, sort, search
     // will always return array
     async index({response, params}){
-        const id = params.id;
         try{
-            Logger.info(`fetch documents in entity with id ${id}`);
-            const entity = await Entity.findOrFail(id);
+            Logger.info(`fetch documents in entity with id ${params.entity}`);
+            const entity = await Entity.findOrFail(params.entity);
             return response.json(await entity.documents().fetch());
         }catch(err){
-            Logger.warning(`fail to fetch documents in entity with id ${id}`);
-            return response.notFound(`entity with id ${id} not found`);
+            Logger.warning(`fail to fetch documents in entity with id ${params.entity}`);
+            return response.notFound(`entity with id ${params.entity} not found`);
         }
     }
 
@@ -46,14 +45,13 @@ class DocumentController {
     // can only be called from StarfallCMS only(must be login)
     // accept data
     async add({request, response, params}){
-        const id = params.id;
         let {data} = request.post();
 
         try{
-            Logger.info(`add new document into entity ${id}`);
+            Logger.info(`add new document into entity ${params.entity}`);
             
             // find entity first
-            const entity = await Entity.findOrFail(id);
+            const entity = await Entity.findOrFail(params.entity);
 
             // then save using entity
             const document = new Document();
@@ -85,11 +83,10 @@ class DocumentController {
     // can only be called from StarfallCMS only(must be login)
     // accept data
     async modify({request, response, params}){
-        const id = params.id;
         let {data} = request.post();
 
         try{
-            Logger.info(`modify existing document with id: ${id}`);
+            Logger.info(`modify existing document with id: ${params.document}`);
 
             // then save using entity
             const document = await Document.findOrFail(id);
@@ -155,24 +152,6 @@ class DocumentController {
             Logger.warning(error);
             return response.internalServerError('Fail to delete documents');
         }
-    }
-
-    /**
-    * @param {object} ctx
-    */
-    // this will be called as connector between api route and normal route
-    async publicGet(ctx){
-        ctx.params.id = ctx.params.entity;
-        return await this.index(ctx);
-    }
-
-    /**
-    * @param {object} ctx
-    */
-    // this will be called as connector between api route and normal route
-    async publicAdd(ctx){
-        ctx.params.id = ctx.params.entity;
-        return await this.add(ctx);
     }
 }
 
