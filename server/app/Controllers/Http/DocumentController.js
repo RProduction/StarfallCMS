@@ -12,8 +12,6 @@ const Ws = use('Ws');
 /** @type {import('@adonisjs/websocket/src/Channel')} */
 const channel = Ws.getChannel('document');
 
-const Drive = use('Drive');
-
 class DocumentController {
     /**
     * @param {object} ctx
@@ -89,7 +87,7 @@ class DocumentController {
             Logger.info(`modify existing document with id: ${params.document}`);
 
             // then save using entity
-            const document = await Document.findOrFail(id);
+            const document = await Document.findOrFail(params.document);
             document.data = data;
             await document.save();
 
@@ -131,14 +129,6 @@ class DocumentController {
 
             Logger.info(`delete documents`);
             await Document.query().whereIn('id', ids).delete();
-
-            // loop ids
-            // delete folder project/entity/document if exist
-            for(const id of ids){
-                const path = `${entity.project_id}/${entity.id}/${id}`;
-                if(await Drive.exists(path))
-                    await Drive.delete(path);
-            }
 
             response.ok('succeed deleting documents');
 

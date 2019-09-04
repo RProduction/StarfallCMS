@@ -28,6 +28,10 @@ class Project extends Model {
         return this.hasMany('App/Models/Entity');
     }
 
+    files(){
+        return this.hasMany('App/Models/File');
+    }
+
     tokens () {
         return this.hasMany('App/Models/Token', 'id', 'user_id');
     }

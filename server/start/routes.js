@@ -66,22 +66,19 @@ Route.group(function(){
 
 // routes for Storage
 Route.group(function(){
-    Route.get('', 'StorageController.index');
-    Route.post('', 'StorageController.upload');
-    Route.post(':folder', 'StorageController.folder');
-    Route.post('move', 'StorageController.move');
-    Route.post('rename', 'StorageController.rename');
+    Route.get(':project', 'StorageController.index');
+    Route.post(':project', 'StorageController.upload');
+    Route.post(':file/rename', 'StorageController.rename');
+    Route.post(':file/public', 'StorageController.public');
     Route.delete('', 'StorageController.delete');
-}).prefix('storage/:project').middleware('auth');
+}).prefix('storage').middleware('auth');
 
 // routes group for public access
 // need to attempt sign in using project name as uid and public key as password
-Route.group(function(){
-    // storage
-    // use for download or file streaming
-    Route.get('', 'StorageController.stream');
 
-}).prefix('api/storage/:project').middleware(['auth:api', 'authApi']);
+// storage
+// use for download or file streaming
+Route.get('api/storage/:file', 'StorageController.stream');
 
 Route.group(function(){
     // documents
