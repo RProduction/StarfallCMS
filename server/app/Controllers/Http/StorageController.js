@@ -6,6 +6,7 @@ const Project = use('App/Models/Project');
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const File = use('App/Models/File');
 
+const Stream = require('stream');
 const getStream = require('get-stream');
 
 /** @type {import('@adonisjs/framework/src/Logger')} */
@@ -48,31 +49,32 @@ class StorageController {
 
             Logger.info('Preparing data to upload');
 
-            // prepare data
+            // process data
             let files = [];
-            request.multipart.file('file[]', {}, file => files.push(file));
-            await request.multipart.process();
-
-            // put file into database
-            let filesData = [];
-            for(const file of files){
+            request.multipart.file('file[]', {}, async file => {
+                // get buffer from stream
+                const filebuffer = await getStream.buffer(file.stream);
+                
+                // put file into database
                 const newfile = new File();
                 newfile.name = file.clientName;
-                newfile.extension = file.extname;
-                newfile.size = file.size;
-                newfile.file = await getStream.buffer(file.stream);
+                newfile.type = `${file.type}/${file.subtype}`;
+                newfile.file = filebuffer;
+                newfile.size = filebuffer.byteLength;
                 await project.files().save(newfile);
-                filesData.push(newfile);
-            }
+
+                Logger.info(`file ${newfile.name}, size : ${newfile.size}`);
+                files.push(newfile);
+            });
 
             Logger.info(`upload files in project ${params.project}`);
+            await request.multipart.process();
 
-            // return list of uploaded file
             response.ok(`succeed uploading file in project ${params.project}`);
             
             const topic = channel.topic('storage');
             if(topic){
-                topic.broadcast('upload', filesData);
+                topic.broadcast('upload', files);
             }
         }
         catch(error){
@@ -184,19 +186,27 @@ class StorageController {
     * * @param {import('@adonisjs/auth/src/Auth')} ctx.auth
     */
     // stream file
-    // receive file(id)
+    // receive file(name)
     async stream({response, auth, params}){
         try{
             Logger.info(`stream file ${params.file}`);
-            const file = await File.findOrFail(params.file);
+            const file = await File.findByOrFail('name', params.file);
             
-            // check api token auth if file is not public
+            // check session auth if file is not public
             if(!file.isPublic){
-                await auth.authenticator('api').check();
+                await auth.check();
             }
 
+            // convert file into stream and stream file
+            const filestream = new Stream.PassThrough();
+            filestream.end(file.file);
+
             response.implicitEnd = false;
-            file.file.pipe(response.response);
+            response.header('content-disposition', 'inline');
+            response.header('filename', file.name);
+            response.header('content-type', file.type);
+            response.header('content-length', file.size);
+            filestream.pipe(response.response);
         }
         catch(error){
             Logger.warning('Fail to stream file');
