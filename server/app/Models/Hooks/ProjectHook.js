@@ -5,6 +5,8 @@
 /** @type {ModelType} */
 const Entity = use('App/Models/Entity');
 
+const fs = require('fs');
+
 /** @type {import('@adonisjs/framework/src/Logger')} */
 const Logger = use('Logger');
 
@@ -26,8 +28,8 @@ ProjectHook.beforeDelete = async (modelInstance) => {
 
     // delete project img if exist
     const path = `img/${modelInstance.id}.${modelInstance.img_type}`;
-    if(await fs.exists(Helpers.publicPath(path))){
-        await fs.unlink(path);
+    if(fs.existsSync(Helpers.publicPath(path))){
+        fs.unlinkSync(path);
     }
 
     // delete files in project
