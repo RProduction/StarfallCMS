@@ -9,6 +9,7 @@ class EntitySchema extends Schema {
       table.bigIncrements();
       table.string('name', 50).notNullable();
       table.bigInteger('project_id').notNullable().references('projects.id');
+      table.unique(['project_id', 'name']);
       table.timestamps();
     })
   }
