@@ -97,7 +97,7 @@ class DocumentController {
             if(topic){
                 topic.broadcast('modify', {
                     id: document.id, 
-                    data: document.data,
+                    data: JSON.parse(document.data),
                     updated_at: document.updated_at
                 });
             }
