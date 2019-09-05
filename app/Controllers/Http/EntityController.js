@@ -29,9 +29,7 @@ class EntityController {
 
             // check existing entity inside project
             const project = await Project.findOrFail(params.project);
-            let count = await project.entities().where('name', name).getCount();
-            if(count > 0) throw('Entity already exist inside project');
-            
+
             // insert
             const entity = new Entity();
             entity.name = name;
@@ -97,14 +95,8 @@ class EntityController {
         try{
             Logger.info(`rename entity with id ${params.entity} into ${name}`);
             
-            const entity = await Entity.findOrFail(params.entity);
-
-            // check if entity exist with new name
-            const project = await Project.findOrFail(entity.project_id);
-            let count = await project.entities().where('name', name).getCount();
-            if(count > 0) throw('Entity already exist inside project');
-
             // rename
+            const entity = await Entity.findOrFail(params.entity);
             entity.name = name;
             await entity.save();
 
