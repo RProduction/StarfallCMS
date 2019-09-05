@@ -5,7 +5,7 @@ const Model = use('Model')
 
 class File extends Model {
     static get hidden(){
-        return ['file'];
+        return ['file', 'type'];
     }
 
     project(){
