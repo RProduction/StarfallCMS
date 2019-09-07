@@ -3,8 +3,12 @@
 /** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
+/** @type {import('@adonisjs/framework/src/Logger')} */
+const Logger = use('Logger');
+
 class EntitySchema extends Schema {
   up () {
+    Logger.info('Create entities table');
     this.create('entities', (table) => {
       table.bigIncrements();
       table.string('name', 50).notNullable();
@@ -15,6 +19,7 @@ class EntitySchema extends Schema {
   }
 
   down () {
+    Logger.info('Drop entities table');
     this.drop('entities')
   }
 }

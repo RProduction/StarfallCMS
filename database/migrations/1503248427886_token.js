@@ -3,8 +3,12 @@
 /** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
+/** @type {import('@adonisjs/framework/src/Logger')} */
+const Logger = use('Logger');
+
 class TokensSchema extends Schema {
   up () {
+    Logger.info('Create tokens table');
     this.create('tokens', (table) => {
       table.bigIncrements();
       table.bigInteger('user_id').notNullable().references('projects.id');
@@ -16,6 +20,7 @@ class TokensSchema extends Schema {
   }
 
   down () {
+    Logger.info('Drop tokens table');
     this.drop('tokens')
   }
 }
