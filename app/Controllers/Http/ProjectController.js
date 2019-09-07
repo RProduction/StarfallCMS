@@ -38,31 +38,42 @@ class ProjectController {
     async add({request, response, auth}){
         const {name} = request.post();
 
-        try{
-            Logger.info(`create new project ${name}`);
-            
-            const project = new Project();
-            project.name = name;
-            await project.save();
+        Logger.info(`create new project ${name}`);
+        const project = new Project();
+        project.name = name;
 
-            // make the token
-            const res = await auth.authenticator('api').generate(project);
-            project.public_key = res.token;
+        try{    
             await project.save();
-
-            Logger.info(`${name}: ${res.token}`);
-            response.ok('succeed create new project');
-            
-            const topic = channel.topic('project');
-            if(topic){
-                topic.broadcast('add', project);
-            }
         }
         catch(error){
             Logger.warning('Fail to create new project');
             Logger.warning(error);
             return response.internalServerError('Fail to create new project');
         }
+
+        // make the token
+        let res;
+        try{    
+            res = await auth.authenticator('api').generate(project);
+            project.public_key = res.token;
+            await project.save();
+        }
+        catch(error){
+            await auth.authenticator('api').revokeTokensForUser(project, null, true);
+            await project.delete();
+
+            Logger.warning('Fail to generate api token');
+            Logger.warning(error);
+            return response.internalServerError('Fail to generate api token');
+        }
+
+        const topic = channel.topic('project');
+        if(topic){
+            topic.broadcast('add', project);
+        }
+
+        Logger.info(`${name}: ${res.token}`);
+        return response.ok('succeed creating new project');
     }
 
     /**
@@ -73,30 +84,28 @@ class ProjectController {
     // delete existing project
     // only creator can delete existing project
     async delete({response, params, auth}){
+        Logger.info(`delete project with id ${params.project}`);
+        const project = await Project.findOrFail(params.project);
+        
         try{
-            Logger.info(`delete project with id ${params.project}`);
-            
-            const project = await Project.findOrFail(params.project);
-
-            // revoke tokens before deleting project
+            // revoke tokens then delete project
             await auth.authenticator('api').revokeTokensForUser(project, null, true);
-
-            // delete project
             await project.delete();
-            response.ok('succeed deleting project');
-
-            const topic = channel.topic('project');
-            if(topic){
-                topic.broadcast('delete', {
-                    id: project.id
-                });
-            }
         }
         catch(error){
             Logger.warning('Fail to delete project');
             Logger.warning(error);
             return response.internalServerError('Fail to delete project');
         }
+
+        const topic = channel.topic('project');
+        if(topic){
+            topic.broadcast('delete', {
+                id: project.id
+            });
+        }
+
+        return response.ok('succeed deleting project');    
     }
 
     /**
@@ -110,11 +119,10 @@ class ProjectController {
     async rename({request, response, params, auth}){
         const {name} = request.post();
 
-        try{
-            Logger.info(`rename project with id ${params.project} into ${name}`);
-            
-            const project = await Project.findOrFail(params.project);
-            
+        Logger.info(`rename project with id ${params.project} into ${name}`);
+        const project = await Project.findOrFail(params.project);
+
+        try{    
             // revoke tokens
             await auth.authenticator('api').revokeTokensForUser(project, null, true);
             const res = await auth.authenticator('api').generate(project);
@@ -122,24 +130,24 @@ class ProjectController {
             project.name = name;
             project.public_key = res.token;
             await project.save();
-
-            response.ok('succeed rename project');
-
-            const topic = channel.topic('project');
-            if(topic){
-                topic.broadcast('rename', {
-                    id: project.id,
-                    name: project.name,
-                    updated_at: project.updated_at,
-                    public_key: project.public_key
-                });
-            }
         }
         catch(error){
             Logger.warning('Fail to rename project');
             Logger.warning(error);
             return response.internalServerError('Fail to rename project');
         }
+
+        const topic = channel.topic('project');
+        if(topic){
+            topic.broadcast('rename', {
+                id: project.id,
+                name: project.name,
+                updated_at: project.updated_at,
+                public_key: project.public_key
+            });
+        }
+
+        return response.ok('succeed renaming project');
     }
 
     /**
@@ -155,40 +163,37 @@ class ProjectController {
             size: '10mb'
         });
 
-        try{
-            Logger.info(`change img for project with id ${params.project}`);
-            
-            const project = await Project.findOrFail(params.project);
+        Logger.info(`change img for project with id ${params.project}`);    
+        const project = await Project.findOrFail(params.project);
 
+        try{
             // process image
             await img.move(Helpers.publicPath('img'), {
                 name: `${project.id}.${img.subtype}`,
                 overwrite: true
             });
-
             if (!img.moved()) {
                 throw img.errors();
             }
 
             project.img_type = img.subtype;
             await project.save();
-
-            response.ok('succeed change img for project');
-
-            const topic = channel.topic('project');
-            if(topic){
-                topic.broadcast('img', {
-                    id: project.id,
-                    img_url: project.img_url,
-                    updated_at: project.updated_at
-                });
-            }
         }
         catch(error){
             Logger.warning('Fail to change image for project');
             Logger.warning(error);
             return response.internalServerError('Fail to change image for project');
         }
+
+        const topic = channel.topic('project');
+        if(topic){
+            topic.broadcast('img', {
+                id: project.id,
+                img_url: project.img_url,
+                updated_at: project.updated_at
+            });
+        }
+        return response.ok('succeed changing project image thumbnail');
     }
 }
 

@@ -35,22 +35,24 @@ class UserController {
     // if not first boot and manager login then 2
     // if not first boot and creator login then 3
     async status({auth}){
-        try{
-            const usercount = await User.getCount();
-            Logger.info(`User count ${usercount}`);
-            if(usercount === 0){
-                Logger.info("First boot");
-                return FIRST_BOOT;
-            }
+        const usercount = await User.getCount();
+        Logger.info(`User count ${usercount}`);
+        if(usercount === 0){
+            Logger.info("First boot");
+            return FIRST_BOOT;
+        }
 
-            const user = await auth.getUser();
-            return user.is_creator ? CREATOR : USER;
+        let user;
+        try{    
+            user = await auth.getUser();
         }
         catch(error){
             Logger.warning("Not logged in");
             Logger.warning(error);
             return NOT_AUTHORIZED;
         }
+
+        return user.is_creator ? CREATOR : USER;
     }
 
     /**
@@ -61,32 +63,31 @@ class UserController {
     async add(ctx){
         const {request, response} = ctx;
         // check if first boot then allow add user as creator
-        // can only add user from creator/manager/first boot
+        // can only add user from creator/first boot
         const status = await this.status(ctx);
         if(status === NOT_AUTHORIZED || status === USER){
             Logger.warning("Cannot add user");
-            return response.internalServerError('Cannot add user');
+            return response.unauthorized('Cannot add user');
         }
 
         const {password, username} = request.post();
-        
+        Logger.info(`username: ${username}, password: ${password}`);
+        Logger.info('create new user');
+
+        const user = new User();
+        user.username = username;
+        user.password = password;
+        user.is_creator = status === FIRST_BOOT;
         try{
-            Logger.info(`username: ${username}, password: ${password}`);
-            Logger.info('create new user');
-
-            const user = new User();
-            user.username = username;
-            user.password = password;
-            user.is_creator = status === FIRST_BOOT;
             await user.save();
-
-            return response.ok('succeed create new user');
         }
         catch(error){
             Logger.warning('Fail to create new user');
             Logger.warning(error);
             return response.internalServerError('Fail to create new user');
         }
+
+        return response.ok('succeed creating new user');
     }
 
     /**
@@ -94,17 +95,19 @@ class UserController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     async delete({response, params}){
-        try{
-            Logger.info(`delete user with id ${params.user}`);
-            const user = await User.findOrFail(params.user);
+        Logger.info(`delete user with id ${params.user}`);
+        const user = await User.findOrFail(params.user);
+
+        try{    
             await user.delete();
-            return response.ok('delete user');
         }
         catch(error){
             Logger.warning('Fail to delete user');
             Logger.warning(error);
             return response.internalServerError('Fail to delete user');
         }
+
+        return response.ok('delete user');
     }
 
     /**
@@ -117,19 +120,19 @@ class UserController {
         const {request, auth, response} = ctx;
         const {username, password} = request.post();
 
+        Logger.info(`username: ${username}, password: ${password}`);
         try{
-            Logger.info(`username: ${username}, password: ${password}`);
             await auth.attempt(username, password);
-
-            // sign in state
-            const status = await this.status(ctx);
-            return response.ok({msg: 'succeed login', status: status});
         }
         catch(error){
             Logger.warning('Fail to login');
             Logger.warning(error);
             return response.internalServerError('Fail to login');
         }
+
+        // sign in state
+        const status = await this.status(ctx);
+        return response.ok({msg: 'succeed login', status: status});
     }
 
     /**
@@ -138,16 +141,18 @@ class UserController {
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     async signout({auth, response}){
+        Logger.info(`logout`);
+        
         try{
-            Logger.info(`logout`);
-            await auth.logout();
-            return response.ok('succeed logout');
+            await auth.logout();    
         }
         catch(error){
             Logger.warning('Fail to logout');
             Logger.warning(error);
             return response.internalServerError('Fail to logout');
         }
+
+        return response.ok('succeed logout');
     }
 }
 
