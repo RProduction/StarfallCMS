@@ -5,8 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "adonis serve",
     "dev": "adonis serve --dev --debug",
+    "start-heroku": "ENV_SILENT=true node server.js",
     "test": "node ace test"
   },
   "keywords": [
