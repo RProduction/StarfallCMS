@@ -32,7 +32,11 @@ module.exports = {
   sqlite: {
     client: 'sqlite3',
     connection: {
-      filename: Helpers.databasePath(`${Env.get('DB_DATABASE', 'development')}.sqlite`)
+      filename: Helpers.databasePath(
+        Env.get('NODE_ENV') === 'development' ? 
+        'development.sqlite' : 
+        `${Env.get('DB_DATABASE')}.sqlite`
+      )
     },
     useNullAsDefault: true,
     pool: {min: 1, max: 100}
