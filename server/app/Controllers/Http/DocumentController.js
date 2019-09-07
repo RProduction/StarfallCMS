@@ -23,14 +23,18 @@ class DocumentController {
     // have get query consisting of limit, sort, search
     // will always return array
     async index({response, params}){
+        Logger.info(`fetch documents in entity with id ${params.entity}`);
+        const entity = await Entity.findOrFail(params.entity);
+        let entities;
+
         try{
-            Logger.info(`fetch documents in entity with id ${params.entity}`);
-            const entity = await Entity.findOrFail(params.entity);
-            return response.json(await entity.documents().fetch());
+            entities = await entity.documents().fetch();
         }catch(err){
             Logger.warning(`fail to fetch documents in entity with id ${params.entity}`);
-            return response.notFound(`entity with id ${params.entity} not found`);
+            return response.internalServerError(`fail to fetch documents in entity with id ${params.entity}`);
         }
+
+        return response.json(entities);
     }
 
     /**
@@ -45,30 +49,28 @@ class DocumentController {
     async add({request, response, params}){
         let {data} = request.post();
 
+        Logger.info(`add new document into entity ${params.entity}`);
+            
+        // find entity first then add new document
+        const entity = await Entity.findOrFail(params.entity);
+        const document = new Document();
+        document.data = data;
+
         try{
-            Logger.info(`add new document into entity ${params.entity}`);
-            
-            // find entity first
-            const entity = await Entity.findOrFail(params.entity);
-
-            // then save using entity
-            const document = new Document();
-            document.data = data;
             await entity.documents().save(document);
-
-            // return document id
-            response.ok({msg: 'succeed adding new document', id: document.id});
-            
-            const topic = channel.topic('document');
-            if(topic){
-                topic.broadcast('add', document);
-            }
         }
         catch(error){
             Logger.warning('Fail to add new document');
             Logger.warning(error);
             return response.internalServerError('Fail to add new document');
         }
+
+        const topic = channel.topic('document');
+        if(topic){
+            topic.broadcast('add', document);
+        }
+
+        return response.ok('succeed adding new document');
     }
 
     /**
@@ -83,30 +85,31 @@ class DocumentController {
     async modify({request, response, params}){
         let {data} = request.post();
 
+        Logger.info(`modify existing document with id: ${params.document}`);
+
+        // then save using entity
+        const document = await Document.findOrFail(params.document);
+        document.data = data;
+
         try{
-            Logger.info(`modify existing document with id: ${params.document}`);
-
-            // then save using entity
-            const document = await Document.findOrFail(params.document);
-            document.data = data;
             await document.save();
-
-            response.ok('succeed modify existing document');
-            
-            const topic = channel.topic('document');
-            if(topic){
-                topic.broadcast('modify', {
-                    id: document.id, 
-                    data: JSON.parse(document.data),
-                    updated_at: document.updated_at
-                });
-            }
         }
         catch(error){
             Logger.warning('Fail to modify document');
             Logger.warning(error);
             return response.internalServerError('Fail to modify document');
         }
+
+        const topic = channel.topic('document');
+        if(topic){
+            topic.broadcast('modify', {
+                id: document.id, 
+                data: JSON.parse(document.data),
+                updated_at: document.updated_at
+            });
+        }
+
+        return response.ok('succeed modify existing document');
     }
 
     /**
@@ -121,27 +124,27 @@ class DocumentController {
         const {ids} = request.post();
 
         try{
-            if(ids.length === 0) throw('No documents to be deleted');
+            if(ids.length === 0) throw 'No documents to be deleted';
+        }catch(err){
+            return response.notFound(err);
+        }
 
-            // get project id, and entity id
-            let entity = await Document.find(ids[0]);
-            entity = await Entity.find(entity.entity_id);
-
-            Logger.info(`delete documents`);
+        Logger.info(`delete documents`);
+        try{
             await Document.query().whereIn('id', ids).delete();
-
-            response.ok('succeed deleting documents');
-
-            const topic = channel.topic('document');
-            if(topic){
-                topic.broadcast('delete', {ids: ids});
-            }
         }
         catch(error){
             Logger.warning('Fail to delete document');
             Logger.warning(error);
             return response.internalServerError('Fail to delete documents');
         }
+
+        const topic = channel.topic('document');
+        if(topic){
+            topic.broadcast('delete', {ids: ids});
+        }
+
+        return response.ok('succeed deleting documents');
     }
 }
 

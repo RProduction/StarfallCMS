@@ -25,15 +25,18 @@ class StorageController {
     // return list of all files in Storage
     // receive: project(id)
     async index({response, params}){
+        Logger.info(`fetch storage in project with id ${params.project}`);
+        const project = await Project.findOrFail(params.project);
+
+        let files;
         try{
-            Logger.info(`fetch storage in project with id ${params.project}`);
-            const project = await Project.findOrFail(params.project);
-            
-            return response.json(await project.files().fetch());
+            files = await project.files().fetch();
         }catch(err){
-            Logger.warning(`fail to fetch storage in project with id ${params.project}`);
-            return response.notFound(`project with id ${params.project} not found`);
+            Logger.warning(`fail to fetch files in project with id ${params.project}`);
+            return response.internalServerError(`fail to fetch files in project with id ${params.project}`);
         }
+
+        return response.json(files);
     }
 
     /**
@@ -44,13 +47,13 @@ class StorageController {
     // upload files
     // receive: project(id), file[]
     async upload({request, response, params}){
-        try{
-            const project = await Project.findOrFail(params.project);
+        const project = await Project.findOrFail(params.project);
 
+        let files = [];
+        try{
             Logger.info('Preparing data to upload');
 
             // process data
-            let files = [];
             request.multipart.file('file[]', {}, async file => {
                 // get buffer from stream
                 const filebuffer = await getStream.buffer(file.stream);
@@ -69,19 +72,19 @@ class StorageController {
 
             Logger.info(`upload files in project ${params.project}`);
             await request.multipart.process();
-
-            response.ok(`succeed uploading file in project ${params.project}`);
-            
-            const topic = channel.topic('storage');
-            if(topic){
-                topic.broadcast('upload', files);
-            }
         }
         catch(error){
             Logger.warning('Fail to upload files');
             Logger.warning(error);
             return response.internalServerError('Fail to upload files');
         }
+        
+        const topic = channel.topic('storage');
+        if(topic){
+            topic.broadcast('upload', files);
+        }
+
+        return response.ok(`succeed uploading file in project ${params.project}`);
     }
 
     /**
@@ -93,30 +96,30 @@ class StorageController {
     // receive: file(id), name
     async rename({request, response, params}){
         const {name} = request.post();
-
+        
+        const file = await File.findOrFail(params.file);
+        file.name = name;
+        
         try{
-            const file = await File.findOrFail(params.file);
-            
             Logger.info(`Rename file from ${file.name} to ${name}`);
-            file.name = name;
             await file.save();
-
-            response.ok('succeed renaming file');
-            
-            const topic = channel.topic('storage');
-            if(topic){
-                topic.broadcast('rename', {
-                    id: file.id,
-                    name: file.name,
-                    updated_at: file.updated_at
-                });
-            }
         }
         catch(error){
             Logger.warning('Fail to rename file');
             Logger.warning(error);
             return response.internalServerError('Fail to rename file');
         }
+
+        const topic = channel.topic('storage');
+        if(topic){
+            topic.broadcast('rename', {
+                id: file.id,
+                name: file.name,
+                updated_at: file.updated_at
+            });
+        }
+
+        return response.ok('succeed renaming file');
     }
 
     /**
@@ -126,29 +129,29 @@ class StorageController {
     // toggle public in file
     // receive: file(id)
     async public({response, params}){
-        try{
-            const file = await File.findOrFail(params.file);
-            
-            Logger.info(`Toggle file isPublic from ${file.isPublic} to ${!file.isPublic}`);
-            file.isPublic = !file.isPublic;
-            await file.save();
+        Logger.info(`Toggle file isPublic from ${file.isPublic} to ${!file.isPublic}`);
+        const file = await File.findOrFail(params.file);    
+        file.isPublic = !file.isPublic;
 
-            response.ok('succeed toggling file isPublic');
-            
-            const topic = channel.topic('storage');
-            if(topic){
-                topic.broadcast('public', {
-                    id: file.id,
-                    isPublic: file.isPublic,
-                    updated_at: file.updated_at
-                });
-            }
+        try{
+            await file.save();    
         }
         catch(error){
             Logger.warning('Fail to toggle file isPublic');
             Logger.warning(error);
             return response.internalServerError('Fail to toggle file isPublic');
         }
+
+        const topic = channel.topic('storage');
+        if(topic){
+            topic.broadcast('public', {
+                id: file.id,
+                isPublic: file.isPublic,
+                updated_at: file.updated_at
+            });
+        }
+        
+        return response.ok('succeed toggling file isPublic');
     }
 
     /**
@@ -161,23 +164,22 @@ class StorageController {
     async delete({request, response}){
         const {ids} = request.post();
 
+        Logger.info('Delete files');
         try{
-            Logger.info('Delete files');
             await File.query().whereIn('id', ids).delete();
-
-            // return folder path
-            response.ok('succeed deleting files');
-            
-            const topic = channel.topic('storage');
-            if(topic){
-                topic.broadcast('delete', {ids: ids});
-            }
         }
         catch(error){
             Logger.warning('Fail to delete files');
             Logger.warning(error);
             return response.internalServerError('Fail to delete files');
         }
+
+        const topic = channel.topic('storage');
+        if(topic){
+            topic.broadcast('delete', {ids: ids});
+        }
+
+        return response.ok('succeed deleting files');
     }
 
     /**
@@ -188,15 +190,15 @@ class StorageController {
     // stream file
     // receive file(name)
     async stream({response, auth, params}){
-        try{
-            Logger.info(`stream file ${params.file}`);
-            const file = await File.findByOrFail('name', params.file);
-            
-            // check session auth if file is not public
-            if(!file.isPublic){
-                await auth.check();
-            }
+        Logger.info(`stream file ${params.file}`);
+        const file = await File.findByOrFail('name', params.file);
 
+        // check session auth if file is not public
+        if(!file.isPublic){
+            await auth.check();
+        }
+
+        try{
             // convert file into stream and stream file
             const filestream = new Stream.PassThrough();
             filestream.end(file.file);
