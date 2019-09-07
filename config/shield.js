@@ -135,12 +135,12 @@ module.exports = {
   |
   */
   csrf: {
-    enable: Env.get('NODE_ENV') !== "development",
+    enable: false,
     methods: ['POST', 'GET', 'DELETE'],
     filterUris: ['/api/*'],
     cookieOptions: {
-      httpOnly: Env.get('NODE_ENV') !== "development",
-      sameSite: Env.get('NODE_ENV') !== "development",
+      httpOnly: true,
+      sameSite: true,
       path: '/',
       maxAge: 7200
     }
