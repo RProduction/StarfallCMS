@@ -3,12 +3,8 @@
 /** @type {import('@adonisjs/lucid/src/Schema')} */
 const Schema = use('Schema')
 
-/** @type {import('@adonisjs/framework/src/Logger')} */
-const Logger = use('Logger');
-
 class FileSchema extends Schema {
   up () {
-    Logger.info('Create files table');
     this.create('files', (table) => {
       table.bigIncrements();
       table.string('name', 255).notNullable();
@@ -23,7 +19,6 @@ class FileSchema extends Schema {
   }
 
   down () {
-    Logger.info('Drop files table');
     this.drop('files')
   }
 }
