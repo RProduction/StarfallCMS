@@ -129,8 +129,8 @@ class StorageController {
     // toggle public in file
     // receive: file(id)
     async public({response, params}){
+        const file = await File.findOrFail(params.file);
         Logger.info(`Toggle file isPublic from ${file.isPublic} to ${!file.isPublic}`);
-        const file = await File.findOrFail(params.file);    
         file.isPublic = !file.isPublic;
 
         try{

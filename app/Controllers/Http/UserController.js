@@ -37,7 +37,7 @@ class UserController {
     async status({auth}){
         const usercount = await User.getCount();
         Logger.info(`User count ${usercount}`);
-        if(usercount === 0){
+        if(usercount == 0){
             Logger.info("First boot");
             return FIRST_BOOT;
         }
