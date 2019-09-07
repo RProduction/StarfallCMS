@@ -5,7 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "adonis serve",
+    "start": "ENV_SILENT=true node server.js",
+    "migrate": "ENV_SILENT=true node ace migration:run --force",
+    "refresh": "ENV_SILENT=true node ace migration:refresh --force",
     "dev": "adonis serve --dev --debug",
     "test": "node ace test"
   },
@@ -13,8 +15,8 @@
     "adonisjs",
     "adonis-app"
   ],
-  "author": "",
-  "license": "UNLICENSED",
+  "author": "Starfall Production",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@adonisjs/ace": "^5.0.8",
