@@ -7,8 +7,8 @@ class FileSchema extends Schema {
   up () {
     this.create('files', (table) => {
       table.bigIncrements();
-      table.string('name').notNullable();
-      table.string('type');
+      table.string('name', 255).notNullable();
+      table.string('type', 20);
       table.integer('size');
       table.binary('file').notNullable();
       table.bigInteger('project_id').notNullable().references('projects.id');

@@ -8,7 +8,7 @@ class TokensSchema extends Schema {
     this.create('tokens', (table) => {
       table.bigIncrements();
       table.bigInteger('user_id').notNullable().references('projects.id');
-      table.string('token').notNullable().unique();
+      table.string('token', 255).notNullable().unique();
       table.string('type', 80).notNullable();
       table.boolean('is_revoked').notNullable().defaultTo(false);
       table.timestamps();

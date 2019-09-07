@@ -7,9 +7,9 @@ class ProjectSchema extends Schema {
   up () {
     this.create('projects', (table) => {
       table.bigIncrements();
-      table.string('name').notNullable().unique();
-      table.string('public_key').unique();
-      table.string('img_type');
+      table.string('name', 50).notNullable().unique();
+      table.string('public_key', 255).unique();
+      table.string('img_type', 10);
       table.timestamps();
     })
   }
