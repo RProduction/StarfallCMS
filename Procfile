@@ -1,2 +1,2 @@
 release: ENV_SILENT=true node ace migration:run — force
-web: npm run start-heroku
+web: ENV_SILENT=true npm run start-heroku
