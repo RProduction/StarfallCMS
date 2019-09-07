@@ -29,7 +29,7 @@ ProjectHook.beforeDelete = async (modelInstance) => {
     // delete project img if exist
     const path = `img/${modelInstance.id}.${modelInstance.img_type}`;
     if(fs.existsSync(Helpers.publicPath(path))){
-        fs.unlinkSync(path);
+        fs.unlinkSync(Helpers.publicPath(path));
     }
 
     // delete files in project
