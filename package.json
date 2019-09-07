@@ -32,7 +32,6 @@
     "@adonisjs/websocket": "^1.0.12",
     "get-stream": "^5.1.0",
     "pg": "^7.12.1",
-    "sqlite3": "^4.1.0",
     "url-parse": "^1.4.7"
   },
   "devDependencies": {},
