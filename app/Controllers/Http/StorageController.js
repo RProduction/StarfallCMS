@@ -191,7 +191,11 @@ class StorageController {
     // receive file(name)
     async stream({response, auth, params}){
         Logger.info(`stream file ${params.file}`);
-        const file = await File.findByOrFail('name', params.file);
+        const project = await Project.findByOrFail('name', params.project);
+        const file = await File.findByOrFail({
+            'name': params.file,
+            'project_id': project
+        });
 
         // check session auth if file is not public
         if(!file.isPublic){
