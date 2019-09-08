@@ -194,7 +194,7 @@ class StorageController {
         const project = await Project.findByOrFail('name', params.project);
         const file = await File.findByOrFail({
             'name': params.file,
-            'project_id': project
+            'project_id': project.id
         });
 
         // check session auth if file is not public
