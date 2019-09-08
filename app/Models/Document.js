@@ -5,7 +5,9 @@ const Model = use('Model')
 
 class Document extends Model {
     getData(data){
-        return JSON.parse(data);
+        if(data.constructor === String)
+            return JSON.parse(data);
+        return data;
     }
 
     setData(data){

@@ -25,16 +25,16 @@ class DocumentController {
     async index({response, params}){
         Logger.info(`fetch documents in entity with id ${params.entity}`);
         const entity = await Entity.findOrFail(params.entity);
-        let entities;
+        let documents;
 
         try{
-            entities = await entity.documents().fetch();
+            documents = await entity.documents().fetch();
         }catch(err){
             Logger.warning(`fail to fetch documents in entity with id ${params.entity}`);
             return response.internalServerError(`fail to fetch documents in entity with id ${params.entity}`);
         }
 
-        return response.json(entities);
+        return response.json(documents);
     }
 
     /**
