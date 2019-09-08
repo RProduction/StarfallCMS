@@ -46,6 +46,24 @@ class AuthApi {
 			return response.unauthorized('Need right entity name to proceed');
 		}
 
+		// change entity from name into id if :entity exist
+		try{
+			if(params.file){
+				let file = await project.files().where(
+					'name', params.file
+				).fetch();
+				file = file.toJSON();
+				if(file.length === 0) throw '';
+
+				params.file = file[0].id;
+			}
+		}
+		catch(error){
+			Logger.warning('Need right file name to proceed');
+			Logger.warning(error);
+			return response.unauthorized('Need right file name to proceed');
+		}
+
 		await next();
 	}
 }

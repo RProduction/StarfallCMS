@@ -73,19 +73,27 @@ Route.group(function(){
     Route.delete('', 'StorageController.delete');
 }).prefix('storage').middleware('auth');
 
+// use for download or file streaming
+Route.get('storage/stream/:project/:file', 'StorageController.stream');
+
 // routes group for public access
 // need to attempt sign in using project name as uid and public key as password
 
-// storage
-// use for download or file streaming
-Route.get('api/storage/:file', 'StorageController.stream');
-
 Route.group(function(){
     // documents
-    Route.get(':entity', 'DocumentController.index');
-    Route.post(':entity', 'DocumentController.add');
+    Route.get(':project/:entity', 'DocumentController.index').middleware(['authApi']);
+    Route.post(':project/:entity', 'DocumentController.add').middleware(['authApi']);
     Route.post(':document/modify', 'DocumentController.modify');
     Route.delete('', 'DocumentController.delete');
-}).prefix('api/document/:project').middleware(['auth:api', 'authApi']);
+}).prefix('api/document').middleware(['auth:api']);
+
+Route.group(function(){
+    // storages
+    Route.get(':project', 'StorageController.index').middleware(['authApi']);
+    Route.post(':project', 'StorageController.upload').middleware(['authApi']);
+    Route.post(':project/:file/rename', 'StorageController.rename').middleware(['authApi']);
+    Route.post(':project/:file/public', 'StorageController.public').middleware(['authApi']);
+    Route.delete('', 'StorageController.delete');
+}).prefix('api/storage').middleware(['auth:api']);
 
 Route.any('#/*', ()=>{});

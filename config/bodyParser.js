@@ -133,7 +133,7 @@ module.exports = {
     | is to true. Otherwise everything is processed manually.
     |
     */
-    processManually: ['/storage/:id']
+    processManually: ['/storage/:project', '/api/storage/:project']
 
     /*
     |--------------------------------------------------------------------------
