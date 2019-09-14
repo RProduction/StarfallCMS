@@ -12,25 +12,67 @@ const Ws = use('Ws');
 /** @type {import('@adonisjs/websocket/src/Channel')} */
 const channel = Ws.getChannel('document');
 
+// return [[key, value], ...]
+function GenerateQueryArray(stringQuery, jsonField){
+    let res = [];
+    const queries = stringQuery.split(',').filter(value => value.length !== 0);
+    for(const query of queries){
+        const [key, value] = query.split(':', 2).map(value => value.trim());
+        // create right key format for query
+        // key has format of key.key.key
+        let newKey = '';
+        key.split('.').filter(value => value.length !== 0).forEach((value, index) => {
+            newKey = index === 0 ? 
+            `${jsonField}->>'${value}'` :
+            `${newKey}->>'${value}'`;
+        });
+
+        res.push([newKey, value]);
+    }
+
+    return res;
+}
+
 class DocumentController {
     /**
     * @param {object} ctx
+    * @param {import('@adonisjs/framework/src/Request')} ctx.request
     * @param {import('@adonisjs/framework/src/Response')} ctx.response
     */
     // get all document data in table
     // need parameter entity id as collection name
     // can only be called from StarfallCMS and api authenticated
-    // have get query consisting of limit, sort, search
+    // have get query consisting of limit, offset, sort, search
+    // limit: number
+    // offset: number
+    // orderBy: key: desc/asc, ...
+    // search: key: value, ...
     // will always return array
-    async index({response, params}){
+    async index({response, request, params}){
+        const {limit, offset, orderBy, search} = request.get();
         Logger.info(`fetch documents in entity with id ${params.entity}`);
         const entity = await Entity.findOrFail(params.entity);
         let documents;
 
         try{
-            documents = await entity.documents().fetch();
+            let query = entity.documents();
+            if(limit) query.limit(limit);
+            if(offset) query.offset(offset);
+            if(orderBy){
+                GenerateQueryArray(orderBy, 'data').forEach(
+                    ([key, value]) => query.orderByRaw(`${key} ${value}`)
+                );
+            }
+            if(search){
+                GenerateQueryArray(search, 'data').forEach(
+                    ([key, value]) => query.whereRaw(`${key} LIKE '%${value}%'`)
+                );
+            }
+
+            documents = await query.fetch();
         }catch(err){
             Logger.warning(`fail to fetch documents in entity with id ${params.entity}`);
+            Logger.warning(err);
             return response.internalServerError(`fail to fetch documents in entity with id ${params.entity}`);
         }
 
