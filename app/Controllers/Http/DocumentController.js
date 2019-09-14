@@ -22,8 +22,9 @@ function GenerateQueryArray(stringQuery, jsonField){
         // key has format of key.key.key
         let newKey = '';
         key.split('.').filter(value => value.length !== 0).forEach((value, index) => {
-            newKey = index === 0 ? 
-            `${jsonField}->>'${value}'` :
+            newKey = index === 0 && key.length === 1 ? 
+            `${jsonField}->>'${value}'` : index === 0 && key.length > 1 ?
+            `${jsonField}->'${value}'` :
             `${newKey}->>'${value}'`;
         });
 
