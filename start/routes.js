@@ -19,14 +19,8 @@ const Route = use('Route');
 /** @type {import('@adonisjs/ignitor/src/Helpers')} */
 const Helpers = use('Helpers');
 
-// routes group with all auth
-Route.group(function(){
-    // routes for users
-    Route.get('user', 'UserController.index');
-
-    // routes for Projects
-    Route.get('project', 'ProjectController.index');
-}).middleware('auth');
+Route.get('user', 'UserController.index').middleware(['auth', 'authCreator']);
+Route.get('project', 'ProjectController.index').middleware(['auth']);
 
 Route.group(function(){
     // routes for User Authentication
