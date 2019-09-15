@@ -21,7 +21,9 @@ class Project extends Model {
     }
 
     getImgUrl ({ id, img_type }) {
-        return `${Env.get('APP_URL')}/img/${id}.${img_type}`;
+        return Env.get('NODE_ENV') === "development" ? 
+            `${Env.get('APP_URL')}/img/${id}.${img_type}` : 
+            `/img/${id}.${img_type}`;
     }
 
     entities(){
