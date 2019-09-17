@@ -21,11 +21,12 @@ function GenerateQueryArray(stringQuery, jsonField){
         // create right key format for query
         // key has format of key.key.key
         let newKey = '';
-        key.split('.').filter(value => value.length !== 0).forEach((value, index) => {
-            newKey = index === 0 && key.length === 1 ? 
-            `${jsonField}->>'${value}'` : index === 0 && key.length > 1 ?
-            `${jsonField}->'${value}'` :
-            `${newKey}->>'${value}'`;
+        const keys = key.split('.').filter(value => value.length !== 0);
+        keys.forEach((value, index) => {
+            newKey = index < keys.length-1 && keys.length > 1 ? 
+            `${jsonField}->'${value}'` : 
+            `${index === 0 ? jsonField : newKey}->>'${value}'`;
+            //Logger.info(`${index} = ${keys.length} = ${newKey}`);
         });
 
         res.push([newKey, value]);
